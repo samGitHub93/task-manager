@@ -1,6 +1,5 @@
 package com.example.taskmanager.list_view;
 
-import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,13 +29,15 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
         return new ListViewHolder(view);
     }
 
-    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull ListViewHolder viewHolder, final int position) {
-        switchPriority(viewHolder, tasks.get(position).getPriorityType());
         viewHolder.getTextView1().setText(tasks.get(position).getTitle());
         viewHolder.getTextView2().setText(tasks.get(position).getText());
         viewHolder.getTextView3().setText(tasks.get(position).getDate());
+        switchPriority(viewHolder, tasks.get(position).getPriorityType());
+        viewHolder.getTextView1().setTextColor(Color.WHITE);
+        viewHolder.getTextView2().setTextColor(Color.WHITE);
+        viewHolder.getTextView3().setTextColor(Color.WHITE);
         if(tasks.get(position).isDone()) {
             viewHolder.getIcon().setImageResource(R.drawable.circle_checked);
             viewHolder.getTextView1().setTextColor(Color.GRAY);
@@ -44,6 +45,8 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
             viewHolder.getTextView3().setTextColor(Color.GRAY);
         }
     }
+
+
 
     @Override
     public int getItemCount() {
@@ -57,7 +60,10 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
 
     public void doneItem(int position){
         tasks.get(position).setDone(true);
-        notifyItemChanged(position);
+        tasks.add(tasks.get(position));
+        tasks.remove(position);
+        notifyItemRemoved(position);
+        notifyItemChanged(tasks.size()-1);
     }
 
     private void switchPriority(ListViewHolder viewHolder, PriorityType priorityType){
