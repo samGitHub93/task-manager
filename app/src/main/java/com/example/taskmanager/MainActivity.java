@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                 .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setTheme(R.style.MaterialCalendarTheme)
                 .build();
         datePicker.show(getSupportFragmentManager(),null);
 
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.calendarButton) {
             MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
                     .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                    .setTheme(R.style.MaterialCalendarTheme)
                     .build();
             datePicker.show(getSupportFragmentManager(),null);
         }

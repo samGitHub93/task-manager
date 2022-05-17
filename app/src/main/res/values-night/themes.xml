@@ -1,16 +1,23 @@
 <resources>
-    <!-- Base application theme. -->
-    <style name="Theme.TaskManager" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <!-- Base Theme -->
+    <style name="Theme.TaskManager" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/gray_huge</item>
         <item name="colorPrimaryVariant">@color/gray_huge</item>
         <item name="colorOnPrimary">@color/black</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/gray_huge</item>
+        <item name="colorSecondary">@color/gray_very_huge</item>
         <item name="colorSecondaryVariant">@color/gray_very_huge</item>
-        <item name="colorOnSecondary">@color/gray_huge</item>
+        <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <!-- Calendar Theme -->
+    <style name="MaterialCalendarTheme" parent="ThemeOverlay.MaterialComponents.MaterialCalendar">
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimary">@color/gray_huge</item>
+    </style>
+
 </resources>

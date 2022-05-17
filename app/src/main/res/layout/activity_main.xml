@@ -25,7 +25,8 @@
             android:layout_alignParentBottom="true"
             android:layout_margin="25dp"
             android:contentDescription="@string/add_a_task"
-            android:backgroundTint="@color/gray"
+            android:backgroundTint="@color/white"
+            android:foregroundTint="@color/black"
             app:srcCompat="@android:drawable/ic_input_add">
         </com.google.android.material.floatingactionbutton.FloatingActionButton>
     </RelativeLayout>

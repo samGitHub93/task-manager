@@ -54,7 +54,7 @@ public class TaskDoneSwiper extends ItemTouchHelper.SimpleCallback{
         int iconMargin = (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
         int iconTop = itemView.getTop() + (itemView.getHeight() - icon.getIntrinsicHeight()) / 2;
         int iconBottom = iconTop + icon.getIntrinsicHeight();
-        int iconLeft = itemView.getLeft() + iconMargin + icon.getIntrinsicWidth();
+        int iconLeft = itemView.getLeft() + iconMargin - icon.getIntrinsicWidth();
         int iconRight = itemView.getLeft() + iconMargin;
         icon.setBounds(iconLeft, iconTop, iconRight, iconBottom);
         background.setBounds(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + ((int) dX) + backgroundCornerOffset, itemView.getBottom());
