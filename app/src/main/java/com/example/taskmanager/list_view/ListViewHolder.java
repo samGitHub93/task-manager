@@ -11,10 +11,10 @@ import com.example.taskmanager.R;
 
 public class ListViewHolder extends RecyclerView.ViewHolder {
 
-    public final ImageView icon;
-    public final TextView textView1;
-    public final TextView textView2;
-    public final TextView textView3;
+    private final ImageView icon;
+    private final TextView textView1;
+    private final TextView textView2;
+    private final TextView textView3;
 
     public ListViewHolder(@NonNull View view) {
         super(view);

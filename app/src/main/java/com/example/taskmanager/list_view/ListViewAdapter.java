@@ -1,5 +1,6 @@
 package com.example.taskmanager.list_view;
 
+import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,15 +12,22 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.taskmanager.R;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.sorter.TaskSorter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
 
-    private final List<Task> tasks;
+    private List<Task> tasks;
+    private final List<Task> doneTasks;
+    private final List<Task> deletedTasks;
 
     public ListViewAdapter(List<Task> tasks) {
         this.tasks = tasks;
+        doneTasks = new ArrayList<>();
+        deletedTasks = new ArrayList<>();
+        differentiateTasks(tasks);
     }
 
     @NonNull
@@ -46,24 +54,48 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
         }
     }
 
-
-
     @Override
     public int getItemCount() {
         return tasks.size();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void deleteItem(int position) {
-        tasks.remove(position);
-        notifyItemRemoved(position);
+        Task task = tasks.get(position);
+        deletedTasks.add(task);
+        doneTasks.remove(task);
+        tasks.remove(task);
+        notifyDataSetChanged();
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void doneItem(int position){
-        tasks.get(position).setDone(true);
-        tasks.add(tasks.get(position));
-        tasks.remove(position);
-        notifyItemRemoved(position);
-        notifyItemChanged(tasks.size()-1);
+        Task task = tasks.get(position);
+        task.setDone(true);
+        doneTasks.add(task);
+        notifyDataSetChanged();
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void restoreItem(int position) {
+        Task task = deletedTasks.get(deletedTasks.size() - 1);
+        deletedTasks.remove(task);
+        if(task.isDone()) doneTasks.add(task);
+        tasks.add(position, task);
+        notifyDataSetChanged();
+        tasks = TaskSorter.sortTasks(tasks);
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    public void undoneItem(int position){
+        Task task = doneTasks.get(doneTasks.size() - 1);
+        tasks.get(position).setDone(false);
+        doneTasks.remove(task);
+        notifyDataSetChanged();
+    }
+
+    public Task getTask(int position){
+        return tasks.get(position);
     }
 
     private void switchPriority(ListViewHolder viewHolder, PriorityType priorityType){
@@ -77,6 +109,14 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
             case HIGH:
                 viewHolder.getIcon().setImageResource(R.drawable.circle_red);
                 break;
+        }
+    }
+
+    private void differentiateTasks(List<Task> tasks){
+        for(Task task : tasks){
+            if(task.isDone()){
+                doneTasks.add(task);
+            }
         }
     }
 }

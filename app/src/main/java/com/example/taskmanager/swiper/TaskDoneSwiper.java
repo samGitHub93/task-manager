@@ -14,24 +14,35 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
 import com.example.taskmanager.list_view.ListViewAdapter;
+import com.example.taskmanager.model.Task;
+import com.google.android.material.snackbar.Snackbar;
 
 public class TaskDoneSwiper extends ItemTouchHelper.SimpleCallback{
 
-    private final Drawable icon;
-    private final ColorDrawable background;
-    private final ListViewAdapter mAdapter;
+    private Drawable icon;
+    private ColorDrawable background;
+    private final ListViewAdapter adapter;
+    private final Context context;
+    private Task task;
 
     public TaskDoneSwiper(Context context, ListViewAdapter adapter) {
         super(0, ItemTouchHelper.RIGHT);
-        mAdapter = adapter;
-        icon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_done_24);
-        background = new ColorDrawable(Color.GREEN);
+        this.context = context;
+        this.adapter = adapter;
     }
 
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         View itemView = viewHolder.itemView;
+        task = adapter.getTask(viewHolder.getAdapterPosition());
+        if(task.isDone()){
+            icon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_refresh_24);
+            background = new ColorDrawable(Color.YELLOW);
+        }else{
+            icon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_done_24);
+            background = new ColorDrawable(Color.GREEN);
+        }
         if (dX > 0) // Swiping to the right
             swipeRightDraw(itemView, c, dX);
         else
@@ -41,7 +52,12 @@ public class TaskDoneSwiper extends ItemTouchHelper.SimpleCallback{
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
-        mAdapter.doneItem(position);
+        if(task.isDone()){
+            adapter.undoneItem(position);
+        }else{
+            addUndoSnackBar(viewHolder, position);
+            adapter.doneItem(position);
+        }
     }
 
     @Override
@@ -60,5 +76,12 @@ public class TaskDoneSwiper extends ItemTouchHelper.SimpleCallback{
         background.setBounds(itemView.getLeft(), itemView.getTop(), itemView.getLeft() + ((int) dX) + backgroundCornerOffset, itemView.getBottom());
         background.draw(c);
         icon.draw(c);
+    }
+
+    private void addUndoSnackBar(RecyclerView.ViewHolder viewHolder, int position){
+        Snackbar snackbar = Snackbar.make(viewHolder.itemView ,"Task done.", Snackbar.LENGTH_LONG);
+        snackbar.setAction("UNDO", view -> adapter.undoneItem(position));
+        snackbar.setActionTextColor(Color.YELLOW);
+        snackbar.show();
     }
 }

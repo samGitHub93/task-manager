@@ -13,9 +13,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
-import com.example.taskmanager.swiper.TaskDeleteSwiper;
 import com.example.taskmanager.list_view.ListViewAdapter;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.sorter.TaskSorter;
+import com.example.taskmanager.swiper.TaskDeleteSwiper;
 import com.example.taskmanager.swiper.TaskDoneSwiper;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class TaskFragment extends Fragment {
     private ListViewAdapter listViewAdapter;
 
     public TaskFragment(List<Task> tasks) {
-        this.tasks = tasks;
+        this.tasks = TaskSorter.sortTasks(tasks);
     }
 
     @Nullable
@@ -50,8 +51,8 @@ public class TaskFragment extends Fragment {
         recyclerView.setAdapter(listViewAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ItemTouchHelper itemTouchHelperDelete = new ItemTouchHelper(new TaskDeleteSwiper(getContext(), listViewAdapter));
-        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskDoneSwiper(getContext(), listViewAdapter));
         itemTouchHelperDelete.attachToRecyclerView(recyclerView);
+        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskDoneSwiper(getContext(), listViewAdapter));
         itemTouchHelperDone.attachToRecyclerView(recyclerView);
     }
 }

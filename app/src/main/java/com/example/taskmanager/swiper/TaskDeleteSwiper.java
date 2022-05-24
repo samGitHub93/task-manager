@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
 import com.example.taskmanager.list_view.ListViewAdapter;
+import com.google.android.material.snackbar.Snackbar;
 
 public class TaskDeleteSwiper extends ItemTouchHelper.SimpleCallback{
 
@@ -41,6 +42,7 @@ public class TaskDeleteSwiper extends ItemTouchHelper.SimpleCallback{
     @Override
     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
         int position = viewHolder.getAdapterPosition();
+        addUndoSnackBar(viewHolder, position);
         mAdapter.deleteItem(position);
     }
 
@@ -60,5 +62,12 @@ public class TaskDeleteSwiper extends ItemTouchHelper.SimpleCallback{
         background.setBounds(itemView.getRight() + ((int) dX) - backgroundCornerOffset, itemView.getTop(), itemView.getRight(), itemView.getBottom());
         background.draw(c);
         icon.draw(c);
+    }
+
+    private void addUndoSnackBar(RecyclerView.ViewHolder viewHolder, int position){
+        Snackbar snackbar = Snackbar.make(viewHolder.itemView ,"Item was removed from the list.", Snackbar.LENGTH_LONG);
+        snackbar.setAction("UNDO", view -> mAdapter.restoreItem(position));
+        snackbar.setActionTextColor(Color.YELLOW);
+        snackbar.show();
     }
 }

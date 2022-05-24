@@ -8,39 +8,19 @@ import java.util.List;
 
 public class TaskSorter {
 
-    private final List<Task> tasks;
-    private List<Task> sortedTasks;
-
-    public TaskSorter(List<Task> tasks) {
-        this.tasks = tasks;
-    }
-
-    public List<Task> sortTasks(){
-        sortedTasks = new ArrayList<>();
-        addTasks(PriorityType.HIGH);
-        addTasks(PriorityType.MEDIUM);
-        addTasks(PriorityType.LOW);
-        addDoneTasks();
+    public static List<Task> sortTasks(List<Task> unsortedTasks) {
+        List<Task> sortedTasks = new ArrayList<>();
+        addTasks(unsortedTasks, sortedTasks, PriorityType.HIGH);
+        addTasks(unsortedTasks, sortedTasks, PriorityType.MEDIUM);
+        addTasks(unsortedTasks, sortedTasks, PriorityType.LOW);
         return sortedTasks;
     }
 
-    private void addTasks(PriorityType priorityType){
-        for(int i=0; i< tasks.size(); i++){
-            if(tasks.get(i).getPriorityType() == priorityType){
-                if(!tasks.get(i).isDone()) {
-                    sortedTasks.add(tasks.get(i));
-                    tasks.remove(tasks.get(i));
-                    i--;
-                }
-            }
-        }
-    }
-
-    private void addDoneTasks() {
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).isDone()) {
-                sortedTasks.add(tasks.get(i));
-                tasks.remove(tasks.get(i));
+    private static void addTasks(List<Task> unsortedTasks, List<Task> sortedTasks, PriorityType priorityType) {
+        for (int i = 0; i < unsortedTasks.size(); i++) {
+            if (unsortedTasks.get(i).getPriorityType() == priorityType) {
+                sortedTasks.add(unsortedTasks.get(i));
+                unsortedTasks.remove(unsortedTasks.get(i));
                 i--;
             }
         }
