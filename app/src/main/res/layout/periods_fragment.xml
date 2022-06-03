@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/separator"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/linear_1"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/gray_very_huge" />
+
+    <LinearLayout
+        android:id="@+id/linear_1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false"
+        app:layout_constraintTop_toBottomOf="@id/separator"
+        app:layout_constraintBottom_toTopOf="@+id/linear_2">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/spinner_layout_1"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/until"
+            android:textColorHint="#000000"
+            app:boxBackgroundColor="@color/white"
+            app:endIconTint="@color/black">
+
+            <com.example.taskmanager.auto_complete_text_view.TextInputDropDownMenu
+                android:id="@+id/auto_complete_text_view_1"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="@string/empty"
+                android:textColorHint="@color/black"
+                android:inputType="none"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_alignParentBottom="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/spinner_layout_2"
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="@string/order"
+            android:textColorHint="#000000"
+            app:boxBackgroundColor="@color/white"
+            app:endIconTint="@color/black">
+
+            <com.example.taskmanager.auto_complete_text_view.TextInputDropDownMenu
+                android:id="@+id/auto_complete_text_view_2"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:hint="@string/empty"
+                android:textColorHint="@color/black"
+                android:inputType="none"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                android:textStyle="bold"
+                android:layout_alignParentBottom="true"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/linear_2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/linear_1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_periods"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="50dp">
+        </androidx.recyclerview.widget.RecyclerView>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

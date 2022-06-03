@@ -83,7 +83,7 @@ public class ListViewAdapter extends RecyclerView.Adapter<ListViewHolder> {
         if(task.isDone()) doneTasks.add(task);
         tasks.add(position, task);
         notifyDataSetChanged();
-        tasks = TaskSorter.sortTasks(tasks);
+        tasks = TaskSorter.sortByPriority(tasks);
     }
 
     @SuppressLint("NotifyDataSetChanged")

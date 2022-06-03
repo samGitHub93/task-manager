@@ -5,65 +5,30 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.example.taskmanager.enumerator.PriorityType;
-import com.example.taskmanager.enumerator.RecurringType;
-import com.example.taskmanager.fragment.TaskFragment;
-import com.example.taskmanager.model.Task;
+import com.example.taskmanager.fragment.DayFragment;
+import com.example.taskmanager.fragment.PeriodsFragment;
 import com.google.android.material.datepicker.MaterialDatePicker;
-
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import com.google.android.material.tabs.TabLayout;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static Fragment currentFragment;
+    private static FragmentManager fragmentManager;
+    private TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        fragmentManager = getSupportFragmentManager();
+        tabLayout = findViewById(R.id.tabs);
+        addTabLayoutAction();
 
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                .setTheme(R.style.MaterialCalendarTheme)
-                .build();
-        datePicker.show(getSupportFragmentManager(),null);
-
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
-        String dateStr = formatter.format(new Date());
-        Task task1 = new Task("SAM","Task 1","Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of set sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",dateStr, PriorityType.MEDIUM, RecurringType.MONTHLY, false);
-        Task task2 = new Task("SAM","Task 2","text 2",dateStr,PriorityType.HIGH, RecurringType.NONE, false);
-        Task task3 = new Task("SAM","Task 3","text 3",dateStr, PriorityType.MEDIUM, RecurringType.DAILY,false);
-        Task task4 = new Task("SAM","Task 4","text 1",dateStr, PriorityType.LOW, RecurringType.WEEKLY,false);
-        Task task5 = new Task("SAM","Task 5","text 2",dateStr, PriorityType.MEDIUM, RecurringType.NONE,false);
-        Task task6 = new Task("SAM","Task 6","text 3",dateStr, PriorityType.MEDIUM, RecurringType.NONE,false);
-        Task task7 = new Task("SAM","Task 7","text 1",dateStr, PriorityType.LOW, RecurringType.YEARLY,false);
-        Task task8 = new Task("SAM","Task 8","text 2",dateStr, PriorityType.HIGH, RecurringType.NONE,false);
-        Task task9 = new Task("SAM","Task 9","text 3",dateStr, PriorityType.HIGH, RecurringType.NONE,false);
-        Task task10 = new Task("SAM","Task 10","text 1",dateStr, PriorityType.MEDIUM, RecurringType.NONE,false);
-        Task task11 = new Task("SAM","Task 11","text 2",dateStr, PriorityType.LOW, RecurringType.WEEKLY,true);
-        Task task12 = new Task("SAM","Task 12","text 3",dateStr, PriorityType.MEDIUM, RecurringType.NONE,true);
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(task1);
-        tasks.add(task2);
-        tasks.add(task3);
-        tasks.add(task4);
-        tasks.add(task5);
-        tasks.add(task6);
-        tasks.add(task7);
-        tasks.add(task8);
-        tasks.add(task9);
-        tasks.add(task10);
-        tasks.add(task11);
-        tasks.add(task12);
-
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        TaskFragment taskFragment = new TaskFragment(tasks);
-        transaction.replace(R.id.fragment, taskFragment);
-        transaction.commit();
+        initFragment();
     }
 
     @Override
@@ -75,13 +40,54 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.calendarButton) {
-            MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
-                    .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                    .setTheme(R.style.MaterialCalendarTheme)
-                    .build();
-            datePicker.show(getSupportFragmentManager(),null);
-        }
+        if (id == R.id.calendarButton) showCalendar();
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showCalendar(){
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                .setTheme(R.style.MaterialCalendarTheme)
+                .build();
+        datePicker.show(getSupportFragmentManager(),null);
+    }
+
+    public void addTabLayoutAction(){
+        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                switchFragment();
+            }
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {}
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {}
+        });
+    }
+
+    public void initFragment(){
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        DayFragment dayFragment = new DayFragment();
+        transaction.add(R.id.fragment, dayFragment).commit();
+        currentFragment = dayFragment;
+    }
+
+    public void switchFragment() {
+        if(currentFragment == null) initFragment();
+        else setCurrentFragment(currentFragment);
+    }
+
+    public void setCurrentFragment(Fragment fragment) {
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        if(fragment instanceof DayFragment) {
+            PeriodsFragment periodsFragment = new PeriodsFragment();
+            transaction.replace(R.id.fragment, periodsFragment);
+            currentFragment = periodsFragment;
+        } else if(fragment instanceof PeriodsFragment) {
+            DayFragment dayFragment = new DayFragment();
+            transaction.replace(R.id.fragment, dayFragment);
+            currentFragment = dayFragment;
+        }
+        transaction.commit();
     }
 }
