@@ -23,8 +23,11 @@ public class TaskSorter {
     }
 
     public static List<Task> sortByDate(List<Task> tasks) {
+        List<Task> sortedTasks = new ArrayList<>();
         Collections.sort(tasks, TaskSorter::compareByDate);
-        return tasks;
+        for(Task task : tasks)
+            sortedTasks.add(0, task);
+        return sortedTasks;
     }
 
     private static void addTasks(List<Task> unsortedTasks, List<Task> sortedTasks, PriorityType priorityType) {
