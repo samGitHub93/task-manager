@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private PeriodsFragment periodsFragment;
     private SearchFragment searchFragment;
     private MaterialDatePicker<Long> datePicker;
-    private MenuItem menuItem;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,13 +47,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        menuItem = item;
         int id = item.getItemId();
         if (id == R.id.calendarButton) showCalendar();
         return super.onOptionsItemSelected(item);
@@ -75,15 +75,15 @@ public class MainActivity extends AppCompatActivity {
         return item -> {
             if(item.getTitle() == getResources().getString(R.string.day)) {
                 setCurrentFragment(dayFragment);
-                menuItem.setVisible(true);
+                menu.getItem(0).setVisible(true);
                 return true;
             } else if(item.getTitle() == getResources().getString(R.string.periods)){
                 setCurrentFragment(periodsFragment);
-                menuItem.setVisible(false);
+                menu.getItem(0).setVisible(false);
                 return true;
             } else if(item.getTitle() == getResources().getString(R.string.search)){
                 setCurrentFragment(searchFragment);
-                menuItem.setVisible(false);
+                menu.getItem(0).setVisible(false);
                 return true;
             }else return false;
         };
