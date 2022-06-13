@@ -1,7 +1,6 @@
 package com.example.taskmanager.auto_complete_text_view;
 
 import android.content.Context;
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.InputType;
@@ -10,7 +9,6 @@ import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 
 public class TextInputDropDownMenu extends AppCompatAutoCompleteTextView {
@@ -47,7 +45,6 @@ public class TextInputDropDownMenu extends AppCompatAutoCompleteTextView {
         return customSavedState;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public void onRestoreInstanceState(Parcelable state) {
         if (!(state instanceof CustomSavedState)) {
@@ -91,4 +88,3 @@ public class TextInputDropDownMenu extends AppCompatAutoCompleteTextView {
         };
     }
 }
-

@@ -13,28 +13,29 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
-import com.example.taskmanager.list_view.ListViewAdapter;
+import com.example.taskmanager.adapter.Adapter;
 import com.example.taskmanager.model.Task;
 import com.google.android.material.snackbar.Snackbar;
 
 public class TaskDoneSwiper extends ItemTouchHelper.SimpleCallback{
 
+    private final Context context;
+    private Adapter adapter;
     private Drawable icon;
     private ColorDrawable background;
-    private final ListViewAdapter adapter;
-    private final Context context;
     private Task task;
 
-    public TaskDoneSwiper(Context context, ListViewAdapter adapter) {
+    public TaskDoneSwiper(Context context) {
         super(0, ItemTouchHelper.RIGHT);
         this.context = context;
-        this.adapter = adapter;
     }
 
     @Override
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+        adapter = (Adapter) recyclerView.getAdapter();
         View itemView = viewHolder.itemView;
+        assert adapter != null;
         task = adapter.getTask(viewHolder.getAdapterPosition());
         if(task.isDone()){
             icon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_refresh_24);

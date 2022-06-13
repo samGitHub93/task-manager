@@ -1,4 +1,4 @@
-package com.example.taskmanager.sorter;
+package com.example.taskmanager.util;
 
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
@@ -23,11 +23,8 @@ public class TaskSorter {
     }
 
     public static List<Task> sortByDate(List<Task> tasks) {
-        List<Task> sortedTasks = new ArrayList<>();
         Collections.sort(tasks, TaskSorter::compareByDate);
-        for(Task task : tasks)
-            sortedTasks.add(0, task);
-        return sortedTasks;
+        return tasks;
     }
 
     private static void addTasks(List<Task> unsortedTasks, List<Task> sortedTasks, PriorityType priorityType) {

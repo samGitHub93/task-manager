@@ -3,7 +3,10 @@ package com.example.taskmanager.model;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.enumerator.RecurringType;
 
+import java.util.Random;
+
 public class Task {
+    private long id;
     private String author;
     private String title;
     private String text;
@@ -15,6 +18,8 @@ public class Task {
     public Task() {}
 
     public Task(String author, String title, String text, String date, PriorityType priorityType, RecurringType recurringType, boolean isDone) {
+        Random random = new Random();
+        this.id = random.nextInt((999999999-1) + 1);
         this.author = author;
         this.title = title;
         this.text = text;
@@ -22,6 +27,10 @@ public class Task {
         this.priorityType = priorityType;
         this.recurringType = recurringType;
         this.isDone = isDone;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getAuthor() {

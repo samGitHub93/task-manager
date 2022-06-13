@@ -13,18 +13,17 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
-import com.example.taskmanager.list_view.ListViewAdapter;
+import com.example.taskmanager.adapter.Adapter;
 import com.google.android.material.snackbar.Snackbar;
 
 public class TaskDeleteSwiper extends ItemTouchHelper.SimpleCallback{
 
     private final Drawable icon;
     private final ColorDrawable background;
-    private final ListViewAdapter mAdapter;
+    private Adapter mAdapter;
 
-    public TaskDeleteSwiper(Context context, ListViewAdapter adapter) {
+    public TaskDeleteSwiper(Context context) {
         super(0, ItemTouchHelper.LEFT);
-        mAdapter = adapter;
         icon = ContextCompat.getDrawable(context, R.drawable.ic_baseline_delete_24);
         background = new ColorDrawable(Color.RED);
     }
@@ -33,6 +32,7 @@ public class TaskDeleteSwiper extends ItemTouchHelper.SimpleCallback{
     public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
         View itemView = viewHolder.itemView;
+        mAdapter = (Adapter) recyclerView.getAdapter();
         if (dX < 0) // Swiping to the left
             swipeLeftDraw(itemView, c, dX);
         else

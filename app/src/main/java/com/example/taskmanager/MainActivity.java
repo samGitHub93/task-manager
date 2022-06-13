@@ -11,23 +11,37 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
+import com.example.taskmanager.fragment.SearchFragment;
+import com.example.taskmanager.util.DateUtil;
 import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.navigation.NavigationBarView;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static Fragment currentFragment;
     private static FragmentManager fragmentManager;
-    private TabLayout tabLayout;
+    private DayFragment dayFragment;
+    private PeriodsFragment periodsFragment;
+    private SearchFragment searchFragment;
+    private MaterialDatePicker<Long> datePicker;
+    private MenuItem menuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         fragmentManager = getSupportFragmentManager();
-        tabLayout = findViewById(R.id.tabs);
-        addTabLayoutAction();
+        dayFragment = new DayFragment();
+        periodsFragment = new PeriodsFragment();
+        searchFragment = new SearchFragment();
+        NavigationBarView navigationBarView = findViewById(R.id.bottom_navigation);
+        navigationBarView.setOnItemSelectedListener(bottomNavigationAction());
 
+        initCalendar();
         initFragment();
     }
 
@@ -39,55 +53,61 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        menuItem = item;
         int id = item.getItemId();
         if (id == R.id.calendarButton) showCalendar();
         return super.onOptionsItemSelected(item);
     }
 
-    private void showCalendar(){
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+    private void initCalendar(){
+        datePicker = MaterialDatePicker.Builder.datePicker()
                 .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
                 .setTheme(R.style.MaterialCalendarTheme)
                 .build();
+        datePicker.addOnPositiveButtonClickListener(selectDateAction());
+    }
+
+    private void showCalendar(){
         datePicker.show(getSupportFragmentManager(),null);
     }
 
-    public void addTabLayoutAction(){
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                switchFragment();
-            }
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
-        });
+    public NavigationBarView.OnItemSelectedListener bottomNavigationAction(){
+        return item -> {
+            if(item.getTitle() == getResources().getString(R.string.day)) {
+                setCurrentFragment(dayFragment);
+                menuItem.setVisible(true);
+                return true;
+            } else if(item.getTitle() == getResources().getString(R.string.periods)){
+                setCurrentFragment(periodsFragment);
+                menuItem.setVisible(false);
+                return true;
+            } else if(item.getTitle() == getResources().getString(R.string.search)){
+                setCurrentFragment(searchFragment);
+                menuItem.setVisible(false);
+                return true;
+            }else return false;
+        };
+    }
+
+    public MaterialPickerOnPositiveButtonClickListener<Long> selectDateAction() {
+        return selection -> {
+            Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            calendar.setTimeInMillis(selection);
+            calendar = DateUtil.getCalendarWithoutTime(calendar.getTime());
+            Date date = calendar.getTime();
+            dayFragment.setDate(date);
+            setCurrentFragment(dayFragment);
+        };
     }
 
     public void initFragment(){
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        DayFragment dayFragment = new DayFragment();
         transaction.add(R.id.fragment, dayFragment).commit();
-        currentFragment = dayFragment;
-    }
-
-    public void switchFragment() {
-        if(currentFragment == null) initFragment();
-        else setCurrentFragment(currentFragment);
     }
 
     public void setCurrentFragment(Fragment fragment) {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        if(fragment instanceof DayFragment) {
-            PeriodsFragment periodsFragment = new PeriodsFragment();
-            transaction.replace(R.id.fragment, periodsFragment);
-            currentFragment = periodsFragment;
-        } else if(fragment instanceof PeriodsFragment) {
-            DayFragment dayFragment = new DayFragment();
-            transaction.replace(R.id.fragment, dayFragment);
-            currentFragment = dayFragment;
-        }
+        transaction.replace(R.id.fragment, fragment);
         transaction.commit();
     }
 }

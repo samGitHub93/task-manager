@@ -1,4 +1,4 @@
-package com.example.taskmanager.list_view;
+package com.example.taskmanager.view_holder;
 
 import android.view.View;
 import android.widget.ImageView;

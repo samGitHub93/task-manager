@@ -38,7 +38,7 @@
             <com.example.taskmanager.auto_complete_text_view.TextInputDropDownMenu
                 android:id="@+id/auto_complete_text_view_1"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:hint="@string/empty"
                 android:textColorHint="@color/black"
                 android:inputType="none"
@@ -62,7 +62,7 @@
             <com.example.taskmanager.auto_complete_text_view.TextInputDropDownMenu
                 android:id="@+id/auto_complete_text_view_2"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="60dp"
                 android:hint="@string/empty"
                 android:textColorHint="@color/black"
                 android:inputType="none"
@@ -85,7 +85,7 @@
             android:id="@+id/recycler_periods"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp">
+            android:layout_marginBottom="60dp">
         </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>

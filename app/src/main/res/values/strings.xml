@@ -6,6 +6,20 @@
     <string name="until">Until…</string>
     <string name="order">Order</string>
     <string name="empty"> </string>
-    <string name="day">DAY</string>
-    <string name="periods">PERIODS</string>
+    <string name="day">Day</string>
+    <string name="periods">Periods</string>
+    <string name="search">Search</string>
+
+    <!-- PERIOD TYPE -->
+    <string name="_3_days">3 days</string>
+    <string name="_1_week">1 week</string>
+    <string name="_2_weeks">2 weeks</string>
+    <string name="_1_month">1 month</string>
+    <string name="_3_months">3 months</string>
+    <string name="_6_months">6 months</string>
+    <string name="_1_year">1 year</string>
+
+    <!-- ORDER TYPE -->
+    <string name="date_order">Date</string>
+    <string name="priority_order">Priority</string>
 </resources>

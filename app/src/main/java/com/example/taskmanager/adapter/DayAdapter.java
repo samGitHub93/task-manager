@@ -19,19 +19,19 @@ import com.example.taskmanager.view_model.TaskViewModel;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> implements Adapter {
+public class DayAdapter extends RecyclerView.Adapter<ListViewHolder> implements Adapter {
 
     private final TaskViewModel viewModel;
     private List<Task> tasks;
     private final List<Task> doneTasks;
     private final List<Task> deletedTasks;
 
-    public PeriodsAdapter(TaskViewModel viewModel, List<Task> tasks) {
+    public DayAdapter(TaskViewModel viewModel, List<Task> tasks) {
         this.viewModel = viewModel;
         this.tasks = tasks;
         doneTasks = new ArrayList<>();
         deletedTasks = new ArrayList<>();
-        differentiateTasks();
+        differentiateTasks(tasks);
     }
 
     @NonNull
@@ -71,6 +71,7 @@ public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> impleme
         doneTasks.remove(task);
         viewModel.deleteTask(task);
         tasks.remove(task);
+        notifyItemRemoved(position);
         notifyDataSetChanged();
     }
 
@@ -92,6 +93,7 @@ public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> impleme
         if(task.isDone()) doneTasks.add(task);
         tasks.add(position, task);
         viewModel.addTask(task);
+        notifyItemInserted(position);
         notifyDataSetChanged();
         tasks = TaskSorter.sortByPriority(tasks);
     }
@@ -125,7 +127,7 @@ public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> impleme
         }
     }
 
-    private void differentiateTasks(){
+    private void differentiateTasks(List<Task> tasks){
         for(Task task : tasks){
             if(task.isDone()){
                 doneTasks.add(task);
