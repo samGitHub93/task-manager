@@ -17,31 +17,37 @@ import java.util.List;
 public class MainViewModel extends AndroidViewModel {
 
     private final TaskRepository taskRepository;
-    private MutableLiveData<List<Task>> mutableLiveData;
+    private MutableLiveData<List<Task>> getTasksByTitleOrTextOrDateLiveData;
+    private MutableLiveData<List<Task>> getTasksByDateLiveData;
+    private MutableLiveData<List<Task>> getTasksByPeriodLiveData;
 
     public MainViewModel(@NonNull Application application) {
         super(application);
         taskRepository = new TaskRepository(application);
-        mutableLiveData = taskRepository.getTasks();
     }
 
-    public MutableLiveData<List<Task>> getAll(){
-        if (mutableLiveData == null) {
-            mutableLiveData = new MutableLiveData<>();
+    public MutableLiveData<List<Task>> getTasksByDate(Date date){
+        if (getTasksByDateLiveData == null) {
+            getTasksByDateLiveData = new MutableLiveData<>();
+            getTasksByDateLiveData = taskRepository.getTasksByDate(getTasksByDateLiveData, DateUtil.getFormatter().format(date));
         }
-        return mutableLiveData;
+        return taskRepository.getTasksByDate(getTasksByDateLiveData, DateUtil.getFormatter().format(date));
     }
 
-    public List<Task> getTasksByTitleOrTextOrDate(String typing){
-        return taskRepository.getTasksByTitleOrTextOrDate(typing);
+    public MutableLiveData<List<Task>> getTasksByPeriod(PeriodType periodType) {
+        if (getTasksByPeriodLiveData == null) {
+            getTasksByPeriodLiveData = new MutableLiveData<>();
+            getTasksByPeriodLiveData = taskRepository.getTasksByPeriod(getTasksByPeriodLiveData, periodType);
+        }
+        return taskRepository.getTasksByPeriod(getTasksByPeriodLiveData, periodType);
     }
 
-    public List<Task> getTasksByDate(Date date){
-        return taskRepository.getTasksByDate(DateUtil.getFormatter().format(date));
-    }
-
-    public List<Task> getTasksByPeriod(PeriodType periodType) {
-        return taskRepository.getTasksByPeriod(periodType);
+    public MutableLiveData<List<Task>> getTasksByTitleOrTextOrDate(String typing){
+        if (getTasksByTitleOrTextOrDateLiveData == null) {
+            getTasksByTitleOrTextOrDateLiveData = new MutableLiveData<>();
+            getTasksByTitleOrTextOrDateLiveData = taskRepository.getTasksByTitleOrTextOrDate(getTasksByTitleOrTextOrDateLiveData, typing);
+        }
+        return taskRepository.getTasksByTitleOrTextOrDate(getTasksByTitleOrTextOrDateLiveData, typing);
     }
 
     public void insertTask(Task task){

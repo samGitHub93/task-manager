@@ -31,7 +31,7 @@ import java.util.TimeZone;
 public class MainActivity extends AppCompatActivity {
 
     public AppDatabase database;
-    private static FragmentManager fragmentManager;
+    public static FragmentManager fragmentManager;
     private DataManager dataManager;
     private DayFragment dayFragment;
     private PeriodsFragment periodsFragment;

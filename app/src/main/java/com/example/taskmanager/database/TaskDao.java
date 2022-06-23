@@ -19,7 +19,7 @@ public interface TaskDao {
     @Query("SELECT * FROM task WHERE id LIKE (:id)")
     Task getById(long id);
 
-    @Query("SELECT * FROM task WHERE (INSTR(title, (:typing)) > 0) OR (INSTR(text, (:typing)) > 0) OR (INSTR(date, (:typing)) > 0)")
+    @Query("SELECT * FROM task WHERE (INSTR(UPPER(title), UPPER((:typing))) > 0) OR (INSTR(UPPER(text), UPPER((:typing))) > 0) OR (INSTR(UPPER(date), UPPER((:typing))) > 0)")
     List<Task> getTasksByTitleOrTextOrDate(String typing);
 
     @Query("SELECT * FROM task WHERE date LIKE (:date)")

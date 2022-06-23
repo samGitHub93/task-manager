@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.SearchAdapter;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_model.MainViewModel;
 
 import java.util.List;
@@ -27,9 +29,9 @@ import java.util.List;
 public class SearchFragment extends Fragment {
 
     private MainViewModel viewModel;
-    private List<Task> searchedTasks;
-    private static final String INITIAL_VALUE = "#####";
-    private String query = INITIAL_VALUE;
+    private Observer<List<Task>> currentObserver;
+    private static final String INITIAL_VALUE = "######";
+    private String typing = INITIAL_VALUE;
 
     @Nullable
     @Override
@@ -45,7 +47,23 @@ public class SearchFragment extends Fragment {
         SearchView searchView = requireActivity().findViewById(R.id.search_view);
         searchView.setOnClickListener(clickAction());
         searchView.setOnQueryTextListener(searchAction());
-        getSearchedTasks(query);
+        updateUI(typing);
+    }
+
+    private void updateUI(String typing){
+        if(currentObserver!=null) removeObserver(this.typing, currentObserver);
+        if(typing.equals("")) typing = INITIAL_VALUE;
+        else this.typing = typing;
+        currentObserver = getNewObserver();
+        viewModel.getTasksByTitleOrTextOrDate(typing).observe(getViewLifecycleOwner(), currentObserver);
+    }
+
+    private void removeObserver(String typing, Observer<List<Task>> observer){
+        viewModel.getTasksByTitleOrTextOrDate(typing).removeObserver(observer);
+    }
+
+    private Observer<List<Task>> getNewObserver(){
+        return tasks -> createRecyclerView(TaskSorter.sortByPriority(tasks));
     }
 
     private SearchView.OnClickListener clickAction(){
@@ -60,27 +78,20 @@ public class SearchFragment extends Fragment {
         return new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                getSearchedTasks(query);
+                updateUI(query);
                 hideKeyboard();
                 return true;
             }
             @Override
             public boolean onQueryTextChange(String query) {
-                getSearchedTasks(query);
+                updateUI(query);
                 return true;
             }
         };
     }
 
-    private void getSearchedTasks(String query){
-        this.query = query;
-        if(query.equals("")) this.query = INITIAL_VALUE;
-        searchedTasks = viewModel.getTasksByTitleOrTextOrDate(this.query);
-        createRecyclerView();
-    }
-
-    private void createRecyclerView(){
-        SearchAdapter searchAdapter = new SearchAdapter(searchedTasks);
+    private void createRecyclerView(List<Task> tasks){
+        SearchAdapter searchAdapter = new SearchAdapter(tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_search);
         recyclerView.setAdapter(searchAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,7 +32,7 @@ import java.util.List;
 public class DayFragment extends Fragment {
 
     private MainViewModel viewModel;
-    private List<Task> tasks;
+    private Observer<List<Task>> currentObserver;
     private TextView textDate;
     private Date date;
 
@@ -46,21 +47,29 @@ public class DayFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        if(date == null) date = new Date();
-        tasks = TaskSorter.sortByPriority(viewModel.getTasksByDate(date));
         textDate = requireActivity().findViewById(R.id.text_date);
-        textDate.setText(DateUtil.getFormatter().format(date));
-        createRecyclerView();
+        if(date == null) setDate(new Date());
+        else setDate(date);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void setDate(Date date) {
+        if(currentObserver != null) removeObserver(this.date, currentObserver);
         this.date = date;
-        tasks = TaskSorter.sortByPriority(viewModel.getTasksByDate(date));
         textDate.setText(DateUtil.getFormatter().format(date));
-        createRecyclerView();
+        currentObserver = getNewObserver();
+        viewModel.getTasksByDate(date).observe(getViewLifecycleOwner(), currentObserver);
     }
 
-    private void createRecyclerView(){
+    private void removeObserver(Date date, Observer<List<Task>> observer){
+        viewModel.getTasksByDate(date).removeObserver(observer);
+    }
+
+    private Observer<List<Task>> getNewObserver(){
+        return tasks -> createRecyclerView(TaskSorter.sortByPriority(tasks));
+    }
+
+    private void createRecyclerView(List<Task> tasks){
         DayAdapter dayAdapter = new DayAdapter(viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_day);
         recyclerView.setAdapter(dayAdapter);

@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -29,15 +30,14 @@ import com.example.taskmanager.swiper.TaskDoneSwiper;
 import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_model.MainViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PeriodsFragment extends Fragment {
 
     private MainViewModel viewModel;
-    private List<Task> tasks;
     private PeriodType periodType;
     private OrderType orderType;
+    private Observer<List<Task>> currentObserver;
 
     public PeriodsFragment(){
         periodType = PeriodType._3_DAY;
@@ -55,9 +55,26 @@ public class PeriodsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
-        tasks = new ArrayList<>(viewModel.getTasksByPeriod(periodType));
         createDropdowns();
-        createRecyclerView();
+        updateUI(periodType, orderType);
+    }
+
+    private void updateUI(PeriodType periodType, OrderType orderType){
+        if(currentObserver != null) removeObserver(this.periodType, currentObserver);
+        this.periodType = periodType;
+        this.orderType = orderType;
+        currentObserver = getNewObserver(orderType);
+        viewModel.getTasksByPeriod(periodType).observe(getViewLifecycleOwner(), currentObserver);
+    }
+
+    private void removeObserver(PeriodType periodType, Observer<List<Task>> observer){
+        viewModel.getTasksByPeriod(periodType).removeObserver(observer);
+    }
+
+    private Observer<List<Task>> getNewObserver(OrderType orderType){
+        if (orderType == OrderType.PRIORITY)
+            return tasks -> createRecyclerView(TaskSorter.sortByPriority(tasks));
+        return tasks -> createRecyclerView(TaskSorter.sortByDate(tasks));
     }
 
     private void createDropdowns(){
@@ -68,9 +85,7 @@ public class PeriodsFragment extends Fragment {
         addItemsToDropdowns(dropdownUntil, dropdownOrder);
     }
 
-    private void createRecyclerView(){
-        if(orderType == OrderType.PRIORITY) tasks = TaskSorter.sortByPriority(tasks);
-        else if(orderType == OrderType.DATE) tasks = TaskSorter.sortByDate(tasks);
+    private void createRecyclerView(List<Task> tasks){
         PeriodsAdapter periodsAdapter = new PeriodsAdapter(viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_periods);
         recyclerView.setAdapter(periodsAdapter);
@@ -95,38 +110,30 @@ public class PeriodsFragment extends Fragment {
     private AdapterView.OnItemClickListener dropdownUntilAction() {
         return (parent, view, position, id) -> {
                 if (id == 0) {
-                    tasks = viewModel.getTasksByPeriod(PeriodType._3_DAY);
                     periodType = PeriodType._3_DAY;
                 } else if (id == 1) {
-                    tasks = viewModel.getTasksByPeriod(PeriodType._1_WEEK);
                     periodType = PeriodType._1_WEEK;
                 } else if (id == 2) {
-                    tasks = viewModel.getTasksByPeriod(PeriodType._2_WEEKS);
                     periodType = PeriodType._2_WEEKS;
                 } else if (id == 3) {
-                    tasks = viewModel.getTasksByPeriod(PeriodType._1_MONTH);
                     periodType = PeriodType._1_MONTH;
                 } else if (id == 4) {
-                    tasks = viewModel.getTasksByPeriod(PeriodType._3_MONTHS);
                     periodType = PeriodType._3_MONTHS;
                 } else if (id == 5) {
-                    tasks = viewModel.getTasksByPeriod(PeriodType._6_MONTHS);
                     periodType = PeriodType._6_MONTHS;
                 }
-            createRecyclerView();
+            updateUI(periodType, orderType);
         };
     }
 
     private AdapterView.OnItemClickListener dropdownOrderAction(){
         return (parent, view, position, id) -> {
             if (id == 0) {
-                tasks = TaskSorter.sortByDate(tasks);
                 orderType = OrderType.DATE;
             } else if (id == 1) {
-                tasks = TaskSorter.sortByPriority(tasks);
                 orderType = OrderType.PRIORITY;
             }
-            createRecyclerView();
+            updateUI(periodType, orderType);
         };
     }
 

@@ -23,9 +23,41 @@ public class TaskRepository {
         taskDao = AppDatabase.getDatabase(application.getApplicationContext()).taskDao();
     }
 
-    public MutableLiveData<List<Task>> getTasks(){
-        MutableLiveData<List<Task>> mutableLiveData = new MutableLiveData<>();
-        mutableLiveData.setValue(taskDao.getAll());
+    public MutableLiveData<List<Task>> getTasksByDate(MutableLiveData<List<Task>> mutableLiveData, String date){
+        mutableLiveData.setValue(taskDao.getByDate(date));
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<List<Task>> getTasksByPeriod(MutableLiveData<List<Task>> mutableLiveData, PeriodType periodType) {
+        Date today = new Date();
+        String strToday = DateUtil.getFormatter().format(today);
+        switch (periodType) {
+            case _3_DAY:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusDays(today, 3))));
+                break;
+            case _1_WEEK:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusWeeks(today, 1))));
+                break;
+            case _2_WEEKS:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusWeeks(today, 2))));
+                break;
+            case _1_MONTH:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, 1))));
+                break;
+            case _3_MONTHS:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, 3))));
+                break;
+            case _6_MONTHS:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, 6))));
+                break;
+            case _1_YEAR:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusYears(today, 1))));
+        }
+        return mutableLiveData;
+    }
+
+    public MutableLiveData<List<Task>> getTasksByTitleOrTextOrDate(MutableLiveData<List<Task>> mutableLiveData, String typing){
+        mutableLiveData.setValue(taskDao.getTasksByTitleOrTextOrDate(typing));
         return mutableLiveData;
     }
 
@@ -42,59 +74,22 @@ public class TaskRepository {
         taskDao.update(task);
     }
 
-    public Task getTaskById(long id){
-        return taskDao.getById(id);
+    private List<Task> getRawTasksByDate(String date){
+        return new ArrayList<>(taskDao.getByDate(date));
     }
 
-    public List<Task> getTasksByDate(String date){
-        return taskDao.getByDate(date);
-    }
-
-    public List<Task> getTasksByPeriod(String startDate, String endDate){
+    private List<Task> getTasksByPeriod(String startDate, String endDate){
         List<Task> taskList = new ArrayList<>();
         try {
             Date sDate = DateUtil.getFormatter().parse(startDate);
             Date eDate = DateUtil.getFormatter().parse(endDate);
             List<Date> dateInRange = DateUtil.getDatesBetween(sDate, eDate);
             for (Date date : dateInRange) {
-                taskList.addAll(getTasksByDate(DateUtil.getFormatter().format(date)));
+                taskList.addAll(getRawTasksByDate(DateUtil.getFormatter().format(date)));
             }
         }catch (ParseException pe){
             pe.getStackTrace();
         }
         return taskList;
-    }
-
-    public List<Task> getTasksByPeriod(PeriodType periodType) {
-        List<Task> taskList = new ArrayList<>();
-        Date today = new Date();
-        String strToday = DateUtil.getFormatter().format(today);
-        switch (periodType) {
-            case _3_DAY:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusDays(today, 3)));
-                break;
-            case _1_WEEK:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusWeeks(today, 1)));
-                break;
-            case _2_WEEKS:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusWeeks(today, 2)));
-                break;
-            case _1_MONTH:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, 1)));
-                break;
-            case _3_MONTHS:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, 3)));
-                break;
-            case _6_MONTHS:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, 6)));
-                break;
-            case _1_YEAR:
-                taskList = getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusYears(today, 1)));
-        }
-        return taskList;
-    }
-
-    public List<Task> getTasksByTitleOrTextOrDate(String typing){
-        return taskDao.getTasksByTitleOrTextOrDate(typing);
     }
 }
