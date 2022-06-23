@@ -1,6 +1,7 @@
 package com.example.taskmanager.fragment;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.SearchView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,33 +20,32 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.SearchAdapter;
 import com.example.taskmanager.model.Task;
-import com.example.taskmanager.util.TaskSorter;
-import com.example.taskmanager.view_model.TaskViewModel;
+import com.example.taskmanager.view_model.MainViewModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SearchFragment extends Fragment {
 
-    private List<Task> tasks;
+    private MainViewModel viewModel;
     private List<Task> searchedTasks;
+    private static final String INITIAL_VALUE = "#####";
+    private String query = INITIAL_VALUE;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_search, container, false);
-        TaskViewModel viewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
-        searchedTasks = new ArrayList<>();
-        tasks = TaskSorter.sortByDate(viewModel.getAllTasks()); // PROVVISORIO
-        return view;
+        return inflater.inflate(R.layout.fragment_search, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         SearchView searchView = requireActivity().findViewById(R.id.search_view);
         searchView.setOnClickListener(clickAction());
         searchView.setOnQueryTextListener(searchAction());
+        getSearchedTasks(query);
     }
 
     private SearchView.OnClickListener clickAction(){
@@ -60,24 +61,22 @@ public class SearchFragment extends Fragment {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 getSearchedTasks(query);
-                createRecyclerView();
                 hideKeyboard();
                 return true;
             }
             @Override
             public boolean onQueryTextChange(String query) {
-                return false;
+                getSearchedTasks(query);
+                return true;
             }
         };
     }
 
-    private void getSearchedTasks(String s){
-        searchedTasks.clear();
-        for(Task task : tasks){
-            if(task.getText().toLowerCase().contains(s.toLowerCase()) || task.getTitle().toLowerCase().contains(s.toLowerCase()) || task.getDate().contains(s)){
-                searchedTasks.add(task);
-            }
-        }
+    private void getSearchedTasks(String query){
+        this.query = query;
+        if(query.equals("")) this.query = INITIAL_VALUE;
+        searchedTasks = viewModel.getTasksByTitleOrTextOrDate(this.query);
+        createRecyclerView();
     }
 
     private void createRecyclerView(){

@@ -1,5 +1,6 @@
 package com.example.taskmanager.fragment;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -18,21 +20,21 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
+import com.example.taskmanager.adapter.PeriodsAdapter;
 import com.example.taskmanager.enumerator.OrderType;
 import com.example.taskmanager.enumerator.PeriodType;
-import com.example.taskmanager.adapter.PeriodsAdapter;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskDeleteSwiper;
 import com.example.taskmanager.swiper.TaskDoneSwiper;
 import com.example.taskmanager.util.TaskSorter;
-import com.example.taskmanager.view_model.TaskViewModel;
+import com.example.taskmanager.view_model.MainViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PeriodsFragment extends Fragment {
 
-    private TaskViewModel viewModel;
+    private MainViewModel viewModel;
     private List<Task> tasks;
     private PeriodType periodType;
     private OrderType orderType;
@@ -48,10 +50,11 @@ public class PeriodsFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_periods, container, false);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         tasks = new ArrayList<>(viewModel.getTasksByPeriod(periodType));
         createDropdowns();
         createRecyclerView();

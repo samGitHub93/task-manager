@@ -1,26 +1,50 @@
 package com.example.taskmanager.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
+
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.enumerator.RecurringType;
 
 import java.util.Random;
 
+@Entity(tableName = "task")
 public class Task {
+
+    @PrimaryKey(autoGenerate = true)
     private long id;
-    private String author;
+    @ColumnInfo(name = "title")
     private String title;
+    @ColumnInfo(name = "text")
     private String text;
+    @ColumnInfo(name = "date")
     private String date;
+    @ColumnInfo(name = "priority_type")
     private PriorityType priorityType;
+    @ColumnInfo(name = "recurring_type")
     private RecurringType recurringType;
+    @ColumnInfo(name = "is_done")
     private boolean isDone;
 
     public Task() {}
 
-    public Task(String author, String title, String text, String date, PriorityType priorityType, RecurringType recurringType, boolean isDone) {
+    @Ignore
+    public Task(String title, String text, String date, PriorityType priorityType, RecurringType recurringType, boolean isDone) {
         Random random = new Random();
         this.id = random.nextInt((999999999-1) + 1);
-        this.author = author;
+        this.title = title;
+        this.text = text;
+        this.date = date;
+        this.priorityType = priorityType;
+        this.recurringType = recurringType;
+        this.isDone = isDone;
+    }
+
+    @Ignore
+    public Task(long id, String title, String text, String date, PriorityType priorityType, RecurringType recurringType, boolean isDone) {
+        this.id = id;
         this.title = title;
         this.text = text;
         this.date = date;
@@ -33,12 +57,8 @@ public class Task {
         return id;
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
+    public void setId(long id) {
+        this.id = id;
     }
 
     public String getTitle() {

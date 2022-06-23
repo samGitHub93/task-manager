@@ -14,19 +14,19 @@ import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_holder.ListViewHolder;
-import com.example.taskmanager.view_model.TaskViewModel;
+import com.example.taskmanager.view_model.MainViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> implements Adapter {
 
-    private final TaskViewModel viewModel;
+    private final MainViewModel viewModel;
     private List<Task> tasks;
     private final List<Task> doneTasks;
     private final List<Task> deletedTasks;
 
-    public PeriodsAdapter(TaskViewModel viewModel, List<Task> tasks) {
+    public PeriodsAdapter(MainViewModel viewModel, List<Task> tasks) {
         this.viewModel = viewModel;
         this.tasks = tasks;
         doneTasks = new ArrayList<>();
@@ -79,7 +79,7 @@ public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> impleme
     public void doneItem(int position){
         Task task = tasks.get(position);
         task.setDone(true);
-        viewModel.setDone(task);
+        viewModel.updateTask(task);
         doneTasks.add(task);
         notifyDataSetChanged();
     }
@@ -91,7 +91,7 @@ public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> impleme
         deletedTasks.remove(task);
         if(task.isDone()) doneTasks.add(task);
         tasks.add(position, task);
-        viewModel.addTask(task);
+        viewModel.insertTask(task);
         notifyDataSetChanged();
         tasks = TaskSorter.sortByPriority(tasks);
     }
@@ -101,7 +101,7 @@ public class PeriodsAdapter extends RecyclerView.Adapter<ListViewHolder> impleme
     public void undoneItem(int position){
         Task task = doneTasks.get(doneTasks.size() - 1);
         tasks.get(position).setDone(false);
-        viewModel.setUnDone(task);
+        viewModel.updateTask(task);
         doneTasks.remove(task);
         notifyDataSetChanged();
     }
