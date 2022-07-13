@@ -23,7 +23,6 @@ import com.example.taskmanager.adapter.TaskAdapter;
 import com.example.taskmanager.enumerator.OrderType;
 import com.example.taskmanager.enumerator.PeriodType;
 import com.example.taskmanager.model.Task;
-import com.example.taskmanager.swiper.TaskModifier;
 import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_model.TaskViewModel;
@@ -89,8 +88,6 @@ public class PeriodsFragment extends Fragment implements AppFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskSwiper(getContext()));
         itemTouchHelperDone.attachToRecyclerView(recyclerView);
-        TaskModifier taskModifier = new TaskModifier(recyclerView.getContext());
-        recyclerView.setOnClickListener(taskModifier);
     }
 
     private void addItemsToDropdowns(AutoCompleteTextView dropdownUntil, AutoCompleteTextView dropdownOrder){
