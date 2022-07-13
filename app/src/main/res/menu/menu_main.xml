@@ -7,4 +7,10 @@
         app:showAsAction="always"
         android:icon="@drawable/ic_baseline_event_24"
         />
+    <item
+        android:id="@+id/refreshButton"
+        android:title=""
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_baseline_cached_24"
+        />
 </menu>

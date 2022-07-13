@@ -14,16 +14,25 @@ import com.example.taskmanager.util.DateUtil;
 import java.util.Date;
 import java.util.List;
 
-public class MainViewModel extends AndroidViewModel {
+public class TaskViewModel extends AndroidViewModel {
 
     private final TaskRepository taskRepository;
+    private MutableLiveData<Task> getTaskById;
     private MutableLiveData<List<Task>> getTasksByTitleOrTextOrDateLiveData;
     private MutableLiveData<List<Task>> getTasksByDateLiveData;
     private MutableLiveData<List<Task>> getTasksByPeriodLiveData;
 
-    public MainViewModel(@NonNull Application application) {
+    public TaskViewModel(@NonNull Application application) {
         super(application);
         taskRepository = new TaskRepository(application);
+    }
+
+    public MutableLiveData<Task> getTaskById(long id){
+        if (getTaskById == null) {
+            getTaskById = new MutableLiveData<>();
+            getTaskById = taskRepository.getTaskById(getTaskById, id);
+        }
+        return taskRepository.getTaskById(getTaskById, id);
     }
 
     public MutableLiveData<List<Task>> getTasksByDate(Date date){

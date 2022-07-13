@@ -13,11 +13,9 @@ public  abstract  class AppDatabase extends RoomDatabase {
 
     private static final Object LOCK = new Object();
     private static final String DATABASE_NAME = "tasks_db";
-
     private static volatile AppDatabase INSTANCE;
 
     public static AppDatabase getDatabase(Context context) {
-        System.out.println(INSTANCE);
         if (INSTANCE == null) {
             synchronized (LOCK) {
                 if (INSTANCE == null) {
@@ -31,5 +29,4 @@ public  abstract  class AppDatabase extends RoomDatabase {
     }
 
     public abstract TaskDao taskDao();
-
 }

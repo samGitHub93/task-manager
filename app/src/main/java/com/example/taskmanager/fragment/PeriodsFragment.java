@@ -1,6 +1,5 @@
 package com.example.taskmanager.fragment;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,7 +10,6 @@ import android.widget.AutoCompleteTextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -21,20 +19,20 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
-import com.example.taskmanager.adapter.PeriodsAdapter;
+import com.example.taskmanager.adapter.TaskAdapter;
 import com.example.taskmanager.enumerator.OrderType;
 import com.example.taskmanager.enumerator.PeriodType;
 import com.example.taskmanager.model.Task;
-import com.example.taskmanager.swiper.TaskDeleteSwiper;
-import com.example.taskmanager.swiper.TaskDoneSwiper;
+import com.example.taskmanager.swiper.TaskModifier;
+import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.TaskSorter;
-import com.example.taskmanager.view_model.MainViewModel;
+import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.List;
 
-public class PeriodsFragment extends Fragment {
+public class PeriodsFragment extends Fragment implements AppFragment {
 
-    private MainViewModel viewModel;
+    private TaskViewModel viewModel;
     private PeriodType periodType;
     private OrderType orderType;
     private Observer<List<Task>> currentObserver;
@@ -47,22 +45,21 @@ public class PeriodsFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_periods, container, false);
+        View view = inflater.inflate(R.layout.fragment_periods, container, false);
+        viewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
+        return view;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         createDropdowns();
-        updateUI(periodType, orderType);
+        updateUI();
     }
 
-    private void updateUI(PeriodType periodType, OrderType orderType){
+    @Override
+    public void updateUI(){
         if(currentObserver != null) removeObserver(this.periodType, currentObserver);
-        this.periodType = periodType;
-        this.orderType = orderType;
         currentObserver = getNewObserver(orderType);
         viewModel.getTasksByPeriod(periodType).observe(getViewLifecycleOwner(), currentObserver);
     }
@@ -86,14 +83,14 @@ public class PeriodsFragment extends Fragment {
     }
 
     private void createRecyclerView(List<Task> tasks){
-        PeriodsAdapter periodsAdapter = new PeriodsAdapter(viewModel, tasks);
+        TaskAdapter taskAdapter = new TaskAdapter(getContext(), viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_periods);
-        recyclerView.setAdapter(periodsAdapter);
+        recyclerView.setAdapter(taskAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        ItemTouchHelper itemTouchHelperDelete = new ItemTouchHelper(new TaskDeleteSwiper(getContext()));
-        itemTouchHelperDelete.attachToRecyclerView(recyclerView);
-        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskDoneSwiper(getContext()));
+        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskSwiper(getContext()));
         itemTouchHelperDone.attachToRecyclerView(recyclerView);
+        TaskModifier taskModifier = new TaskModifier(recyclerView.getContext());
+        recyclerView.setOnClickListener(taskModifier);
     }
 
     private void addItemsToDropdowns(AutoCompleteTextView dropdownUntil, AutoCompleteTextView dropdownOrder){
@@ -122,7 +119,7 @@ public class PeriodsFragment extends Fragment {
                 } else if (id == 5) {
                     periodType = PeriodType._6_MONTHS;
                 }
-            updateUI(periodType, orderType);
+            updateUI();
         };
     }
 
@@ -133,7 +130,7 @@ public class PeriodsFragment extends Fragment {
             } else if (id == 1) {
                 orderType = OrderType.PRIORITY;
             }
-            updateUI(periodType, orderType);
+            updateUI();
         };
     }
 

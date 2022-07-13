@@ -20,6 +20,7 @@ import com.example.taskmanager.util.TaskUtil;
 import com.example.taskmanager.view_model.TaskViewModel;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.Calendar;
@@ -27,7 +28,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.TimeZone;
 
-public class AddTaskActivity extends AppCompatActivity {
+public class ModifyTaskActivity extends AppCompatActivity {
 
     private DataManager dataManager;
     private TaskViewModel addTaskViewModel;
@@ -37,18 +38,20 @@ public class AddTaskActivity extends AppCompatActivity {
     private TextInputEditText dateTextView;
     private AutoCompleteTextView priorityTextView;
     private AutoCompleteTextView recurringTextView;
+    private Task retrievedTask;
     private static final String EMPTY_STRING = "";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_task);
+        setContentView(R.layout.activity_modify_task);
         dataManager = DataManager.getInstance(getApplication());
         addTaskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         initElements();
         initCalendar();
+        retrievedTask = retrieveTask();
     }
 
     @Override
@@ -68,17 +71,36 @@ public class AddTaskActivity extends AppCompatActivity {
         recurringTextView = findViewById(R.id.recurring_text_view);
         addItemsToDropdowns();
         dateTextView.setOnClickListener(dateTextViewAction());
-        Button addButton = findViewById(R.id.add_button);
-        addButton.setOnClickListener(buttonAction());
+        Button modButton = findViewById(R.id.modify_button);
+        Button delButton = findViewById(R.id.delete_button);
+        modButton.setOnClickListener(modifyButtonAction());
+        delButton.setOnClickListener(showDialog());
+    }
+
+    private Task retrieveTask(){
+        Task retrievedTask = new Task();
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            long id = extras.getLong("id");
+            retrievedTask = addTaskViewModel.getTaskById(id).getValue();
+            assert retrievedTask != null;
+            titleTextView.setText(retrievedTask.getTitle());
+            detailsTextView.setText(retrievedTask.getText());
+            dateTextView.setText(retrievedTask.getDate());
+            priorityTextView.setText(retrievedTask.getPriorityType().toString(), false);
+            recurringTextView.setText(retrievedTask.getRecurringType().toString(), false);
+        }
+        return retrievedTask;
     }
 
     private View.OnClickListener dateTextViewAction(){
         return view -> showCalendar();
     }
 
-    private View.OnClickListener buttonAction(){
+    private View.OnClickListener modifyButtonAction(){
         return view -> {
             Task task = new Task();
+            task.setId(retrievedTask.getId());
             task.setTitle(titleTextView.getText().toString());
             task.setText(detailsTextView.getText().toString());
             task.setDate(Objects.requireNonNull(dateTextView.getText()).toString());
@@ -86,13 +108,23 @@ public class AddTaskActivity extends AppCompatActivity {
             task.setRecurringType(TaskUtil.stringToRecurringType(recurringTextView.getText().toString()));
             task.setDone(false);
             if(!dateTextView.getText().toString().equals(EMPTY_STRING)) {
-                addTaskViewModel.insertTask(task);
+                addTaskViewModel.updateTask(task);
                 dataManager.synchronizeFromRoom();
                 Toast.makeText(this, "Saved!", Toast.LENGTH_LONG).show();
                 MainActivity.currentFragment.updateUI();
                 this.finish();
             }else Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
         };
+    }
+
+    private void deleteTask() {
+        if (!Objects.requireNonNull(dateTextView.getText()).toString().equals(EMPTY_STRING)) {
+            addTaskViewModel.deleteTask(retrievedTask);
+            dataManager.synchronizeFromRoom();
+            Toast.makeText(this, "Saved!", Toast.LENGTH_LONG).show();
+            MainActivity.currentFragment.updateUI();
+            this.finish();
+        } else Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
     }
 
     private void initCalendar(){
@@ -106,6 +138,13 @@ public class AddTaskActivity extends AppCompatActivity {
 
     private void showCalendar(){
         datePicker.show(getSupportFragmentManager(),null);
+    }
+
+    private View.OnClickListener showDialog(){
+        return view -> new MaterialAlertDialogBuilder(ModifyTaskActivity.this, R.style.Theme_MaterialComponents_Light_Dialog_Alert)
+                .setTitle(getResources().getString(R.string.delete_dialog_title))
+                .setNegativeButton(getResources().getString(R.string.cancel_dialog), (dialog, which) -> dialog.dismiss())
+                .setPositiveButton(getResources().getString(R.string.confirm_dialog), (dialog, which) -> deleteTask()).show();
     }
 
     public MaterialPickerOnPositiveButtonClickListener<Long> selectDateAction() {

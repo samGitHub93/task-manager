@@ -23,6 +23,11 @@ public class TaskRepository {
         taskDao = AppDatabase.getDatabase(application.getApplicationContext()).taskDao();
     }
 
+    public MutableLiveData<Task> getTaskById(MutableLiveData<Task> mutableLiveData, long id){
+        mutableLiveData.setValue(taskDao.getById(id));
+        return mutableLiveData;
+    }
+
     public MutableLiveData<List<Task>> getTasksByDate(MutableLiveData<List<Task>> mutableLiveData, String date){
         mutableLiveData.setValue(taskDao.getByDate(date));
         return mutableLiveData;
@@ -70,7 +75,6 @@ public class TaskRepository {
     }
 
     public void updateTask(Task task){
-        task.setDone(!task.isDone());
         taskDao.update(task);
     }
 

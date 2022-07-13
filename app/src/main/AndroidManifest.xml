@@ -31,6 +31,11 @@
             android:exported="true"
             android:label="New task">
         </activity>
+        <activity
+            android:name=".ModifyTaskActivity"
+            android:exported="true"
+            android:label="Modify/Delete task">
+        </activity>
     </application>
 
 </manifest>

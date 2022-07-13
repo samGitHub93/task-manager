@@ -13,7 +13,7 @@
     <string name="periods">Periods</string>
     <string name="search">Search</string>
 
-    <!-- ADD ACTIVITY -->
+    <!-- ADD/MODIFY ACTIVITY -->
     <string name="title_label">Title:</string>
     <string name="details_label">Details:</string>
     <string name="date_label">Date:</string>
@@ -21,6 +21,11 @@
     <string name="priority_label">Priority:</string>
     <string name="recurring_label">Recurring:</string>
     <string name="add_button_label">ADD</string>
+    <string name="modify_button_label">MODIFY</string>
+    <string name="delete_button_label">DELETE</string>
+    <string name="delete_dialog_title">Are you sure you want to delete the task?</string>
+    <string name="confirm_dialog">Confirm</string>
+    <string name="cancel_dialog">Cancel</string>
 
     <!-- PERIOD TYPE -->
     <string name="_3_days">3 days</string>
@@ -34,4 +39,17 @@
     <!-- ORDER TYPE -->
     <string name="date_order">Date</string>
     <string name="priority_order">Priority</string>
+
+    <!-- PRIORITY TYPE -->
+    <string name="medium">Medium</string>
+    <string name="high">High</string>
+    <string name="low">Low</string>
+
+    <!-- RECURRING TYPE -->
+    <string name="none">None</string>
+    <string name="daily">Daily</string>
+    <string name="weekly">Weekly</string>
+    <string name="monthly">Monthly</string>
+    <string name="yearly">Yearly</string>
+
 </resources>

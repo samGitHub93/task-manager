@@ -111,7 +111,7 @@
                 android:padding="5dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
                 <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                   android:id="@+id/recurring_text_view"
+                    android:id="@+id/recurring_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="false"
@@ -125,24 +125,38 @@
 
     </ScrollView>
 
-        <LinearLayout
-            android:id="@+id/linear_button"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="60dp"
-            android:gravity="center"
-            android:background="@color/gray_very_huge">
+    <LinearLayout
+        android:id="@+id/linear_button"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:gravity="center"
+        android:background="@color/gray_very_huge">
 
-            <Button
-                android:id="@+id/add_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:backgroundTint="@color/white"
-                android:textColor="@color/black"
-                android:text="@string/add_button_label"
-                android:layout_gravity="center">
-            </Button>
+        <Button
+            android:id="@+id/modify_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/white"
+            android:textColor="@color/black"
+            android:text="@string/modify_button_label"
+            android:layout_gravity="center"
+            android:layout_margin="8dp"
+            style="?android:attr/buttonBarButtonStyle">
+        </Button>
 
-        </LinearLayout>
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/red"
+            android:textColor="@color/black"
+            android:text="@string/delete_button_label"
+            android:layout_gravity="center"
+            android:layout_margin="8dp"
+            style="?android:attr/buttonBarButtonStyle">
+        </Button>
+
+    </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

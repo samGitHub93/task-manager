@@ -1,6 +1,5 @@
 package com.example.taskmanager.fragment;
 
-import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,7 +8,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -18,20 +16,19 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.R;
-import com.example.taskmanager.adapter.DayAdapter;
+import com.example.taskmanager.adapter.TaskAdapter;
 import com.example.taskmanager.model.Task;
-import com.example.taskmanager.swiper.TaskDeleteSwiper;
-import com.example.taskmanager.swiper.TaskDoneSwiper;
+import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskSorter;
-import com.example.taskmanager.view_model.MainViewModel;
+import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.Date;
 import java.util.List;
 
-public class DayFragment extends Fragment {
+public class DayFragment extends Fragment implements AppFragment {
 
-    private MainViewModel viewModel;
+    private TaskViewModel viewModel;
     private Observer<List<Task>> currentObserver;
     private TextView textDate;
     private Date date;
@@ -39,26 +36,29 @@ public class DayFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_day, container, false);
+        View view = inflater.inflate(R.layout.fragment_day, container, false);
+        viewModel = new ViewModelProvider(requireActivity()).get(TaskViewModel.class);
+        return view;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         textDate = requireActivity().findViewById(R.id.text_date);
-        if(date == null) setDate(new Date());
-        else setDate(date);
+        updateUI();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void setDate(Date date) {
-        if(currentObserver != null) removeObserver(this.date, currentObserver);
-        this.date = date;
+    @Override
+    public void updateUI() {
+        if(currentObserver != null) removeObserver(date, currentObserver);
+        if(date == null) date = new Date();
         textDate.setText(DateUtil.getFormatter().format(date));
         currentObserver = getNewObserver();
         viewModel.getTasksByDate(date).observe(getViewLifecycleOwner(), currentObserver);
+    }
+
+    public void setDate(Date date){
+        this.date = date;
     }
 
     private void removeObserver(Date date, Observer<List<Task>> observer){
@@ -70,13 +70,11 @@ public class DayFragment extends Fragment {
     }
 
     private void createRecyclerView(List<Task> tasks){
-        DayAdapter dayAdapter = new DayAdapter(viewModel, tasks);
+        TaskAdapter taskAdapter = new TaskAdapter(getContext(), viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_day);
-        recyclerView.setAdapter(dayAdapter);
+        recyclerView.setAdapter(taskAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        ItemTouchHelper itemTouchHelperDelete = new ItemTouchHelper(new TaskDeleteSwiper(getContext()));
-        itemTouchHelperDelete.attachToRecyclerView(recyclerView);
-        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskDoneSwiper(getContext()));
+        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskSwiper(getContext()));
         itemTouchHelperDone.attachToRecyclerView(recyclerView);
     }
 }

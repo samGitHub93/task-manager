@@ -1,11 +1,8 @@
 package com.example.taskmanager.database;
 
+import android.app.Application;
 import android.content.Context;
-import android.os.Build;
-import android.os.Looper;
 import android.widget.Toast;
-
-import androidx.annotation.RequiresApi;
 
 import com.example.taskmanager.BuildConfig;
 import com.example.taskmanager.R;
@@ -29,57 +26,60 @@ import java.util.List;
 
 public class DataManager {
 
+    private static DataManager instance;
     private final AppDatabase database;
     private final Context context;
     private static final String REPO_URL = BuildConfig.REPO_URL;
 
-    public DataManager(Context context) {
-        this.context = context;
-        database = AppDatabase.getDatabase(context);
+    private DataManager(Application application) {
+        this.context = application.getApplicationContext();
+        database = AppDatabase.getDatabase(this.context);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void updateRoomDatabase() {
-        ThreadUtil.runSynchronizedTask(readPublicExternalCsv(), 100);
+    public static DataManager getInstance(Application application){
+        if (instance == null)
+            instance = new DataManager(application);
+        return instance;
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void saveData() {
-        List<Task> tasks = database.taskDao().getAll();
-        ThreadUtil.runSynchronizedTask(writePublicExternalCsv(tasks), 300);
+    public void synchronizeFromRoom() {
+        ThreadUtil.runSynchronizedTask(new Thread(() -> {
+            List<Task> tasks = database.taskDao().getAll();
+            writePublicExternalCsv(tasks);
+            readPublicExternalCsv();
+        }
+        ), 200);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private Thread readPublicExternalCsv() {
-        return new Thread(() ->
-        {
-            Looper.prepare();
+    public void synchronizeFromWeb() {
+        ThreadUtil.runSynchronizedTask(new Thread(() -> {
+            readPublicExternalCsv();
+            List<Task> tasks = database.taskDao().getAll();
+            writePublicExternalCsv(tasks);
+        }
+        ), 400);
+    }
+
+    private void readPublicExternalCsv() {
             try {
+                Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
                 pullFromRemote();
             } catch (IOException | GitAPIException e) {
                 Toast.makeText(context, "Try to modify token on GitHub!", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
-        }
-        );
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
-    private Thread writePublicExternalCsv(List<Task> tasks) {
-        return new Thread(() ->
-        {
-            Looper.prepare();
+    private void writePublicExternalCsv(List<Task> tasks) {
             try {
+                Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
                 pushToRemote(tasks);
             } catch (IOException | GitAPIException e) {
                 Toast.makeText(context, "Try to modify token on GitHub!", Toast.LENGTH_LONG).show();
                 e.printStackTrace();
             }
-        }
-        );
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private void pushToRemote(List<Task> tasks) throws IOException, GitAPIException {
         String userGit = context.getString(R.string.user_git);
         String tokenGit = context.getString(R.string.tkn_git);
@@ -100,7 +100,6 @@ public class DataManager {
         git.push().setCredentialsProvider(credentials).call();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.N)
     private void pullFromRemote() throws IOException, GitAPIException {
         List<Task> tasks = new ArrayList<>();
         String userGit = context.getString(R.string.user_git);
@@ -149,18 +148,15 @@ public class DataManager {
     }
 
     private void saveToRoom(List<Task> tasks) {
-        System.out.println("save to ROOM");
         database.taskDao().deleteAll();
         database.taskDao().insertAll(tasks);
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void readPrivateExternalCsv() {
+    private void readPrivateExternalCsv() {
         // TODO...
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public void writePrivateExternalCsv() {
+    private void writePrivateExternalCsv() {
         // TODO...
     }
 }

@@ -1,5 +1,8 @@
 package com.example.taskmanager.adapter;
 
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,19 +11,28 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmanager.ModifyTaskActivity;
 import com.example.taskmanager.R;
+import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.view_holder.ListViewHolder;
+import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.List;
 
-public class SearchAdapter extends RecyclerView.Adapter<ListViewHolder>{
+public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements Adapter<Task> {
 
+    private final Context context;
+    private final TaskViewModel viewModel;
     private final List<Task> tasks;
+    private final DataManager dataManager;
 
-    public SearchAdapter(List<Task> tasks) {
+    public TaskAdapter(Context context, TaskViewModel viewModel, List<Task> tasks) {
+        this.context = context;
+        this.viewModel = viewModel;
         this.tasks = tasks;
+        dataManager = DataManager.getInstance(viewModel.getApplication());
     }
 
     @NonNull
@@ -45,11 +57,49 @@ public class SearchAdapter extends RecyclerView.Adapter<ListViewHolder>{
             viewHolder.getTextView2().setTextColor(Color.GRAY);
             viewHolder.getTextView3().setTextColor(Color.GRAY);
         }
+        viewHolder.itemView.setOnClickListener(onClickAction(viewHolder));
     }
 
     @Override
     public int getItemCount() {
         return tasks.size();
+    }
+
+    @Override
+    @SuppressLint("NotifyDataSetChanged")
+    public void doneItem(int position){
+        Task task = tasks.get(position);
+        task.setDone(true);
+        viewModel.updateTask(task);
+        dataManager.synchronizeFromRoom();
+        notifyDataSetChanged();
+    }
+
+    @Override
+    @SuppressLint("NotifyDataSetChanged")
+    public void undoneItem(int position){
+        Task task = tasks.get(position);
+        task.setDone(false);
+        viewModel.updateTask(task);
+        dataManager.synchronizeFromRoom();
+        notifyDataSetChanged();
+    }
+
+    @Override
+    public Task getTask(int position){
+        return tasks.get(position);
+    }
+
+    public View.OnClickListener onClickAction(RecyclerView.ViewHolder viewHolder) {
+        return view -> {
+            int position = viewHolder.getAdapterPosition();
+            if (position != RecyclerView.NO_POSITION)
+                notifyItemChanged(position);
+            long id = getTask(position).getId();
+            Intent modifyTaskActivity = new Intent(context, ModifyTaskActivity.class);
+            modifyTaskActivity.putExtra("id", id);
+            context.startActivity(modifyTaskActivity);
+        };
     }
 
     private void switchPriority(ListViewHolder viewHolder, PriorityType priorityType){

@@ -6,4 +6,5 @@
     <color name="gray_huge">#555555</color>
     <color name="gray_very_huge">#222222</color>
     <color name="black">#000000</color>
+    <color name="red">#FF0000</color>
 </resources>
