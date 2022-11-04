@@ -61,6 +61,14 @@ public class TaskRepository {
         return mutableLiveData;
     }
 
+    public MutableLiveData<List<Task>> getLateTasks(MutableLiveData<List<Task>> mutableLiveData){
+        Date today = new Date();
+        String strYesterday = DateUtil.getFormatter().format(DateUtil.getDatePlusDays(today, -1));
+        List<Task> undoneTasks = getUndoneTasks(getTasksByPeriod(DateUtil.getFormatter().format(DateUtil.getDatePlusMonths(today, -6)), strYesterday));
+        mutableLiveData.setValue(undoneTasks);
+        return mutableLiveData;
+    }
+
     public MutableLiveData<List<Task>> getTasksByTitleOrTextOrDate(MutableLiveData<List<Task>> mutableLiveData, String typing){
         mutableLiveData.setValue(taskDao.getTasksByTitleOrTextOrDate(typing));
         return mutableLiveData;
@@ -93,6 +101,14 @@ public class TaskRepository {
             }
         }catch (ParseException pe){
             pe.getStackTrace();
+        }
+        return taskList;
+    }
+
+    private List<Task> getUndoneTasks(List<Task> tasks){
+        List<Task> taskList = new ArrayList<>();
+        for(Task task : tasks){
+            if(!task.isDone()) taskList.add(task);
         }
         return taskList;
     }

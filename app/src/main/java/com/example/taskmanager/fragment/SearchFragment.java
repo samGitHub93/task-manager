@@ -17,8 +17,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.TaskAdapter;
+import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.TaskSorter;
@@ -32,6 +34,7 @@ public class SearchFragment extends Fragment implements AppFragment {
     private Observer<List<Task>> currentObserver;
     private static final String INITIAL_VALUE = "######";
     private String query = INITIAL_VALUE;
+    private static boolean isListModified = false;
 
     @Nullable
     @Override
@@ -106,5 +109,43 @@ public class SearchFragment extends Fragment implements AppFragment {
             InputMethodManager imm = (InputMethodManager) requireActivity().getApplicationContext().getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+    }
+
+    @Override
+    public boolean isListModified(){
+        return isListModified;
+    }
+
+    @Override
+    public void setListModified(){
+        isListModified = true;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        System.out.println("ATTACHED SEARCH");
+        isListModified = false;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        System.out.println("DETACHED SEARCH");
+        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        System.out.println("STOPPED SEARCH");
+        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        System.out.println("RESUMED SEARCH");
+        ((MainActivity) requireActivity()).updateMenu();
     }
 }

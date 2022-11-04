@@ -1,5 +1,6 @@
 package com.example.taskmanager.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,8 +16,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.TaskAdapter;
+import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.DateUtil;
@@ -32,6 +35,7 @@ public class DayFragment extends Fragment implements AppFragment {
     private Observer<List<Task>> currentObserver;
     private TextView textDate;
     private Date date;
+    private static boolean isListModified = false;
 
     @Nullable
     @Override
@@ -76,5 +80,43 @@ public class DayFragment extends Fragment implements AppFragment {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskSwiper(getContext()));
         itemTouchHelperDone.attachToRecyclerView(recyclerView);
+    }
+
+    @Override
+    public boolean isListModified(){
+        return isListModified;
+    }
+
+    @Override
+    public void setListModified(){
+        isListModified = true;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        System.out.println("ATTACHED DAY");
+        isListModified = false;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        System.out.println("DETACHED DAY");
+        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        System.out.println("STOPPED DAY");
+        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        System.out.println("RESUMED DAY");
+        ((MainActivity) requireActivity()).updateMenu();
     }
 }

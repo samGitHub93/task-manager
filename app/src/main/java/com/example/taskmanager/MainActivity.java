@@ -1,5 +1,6 @@
 package com.example.taskmanager;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.taskmanager.database.AppDatabase;
 import com.example.taskmanager.database.DataManager;
@@ -18,6 +20,7 @@ import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
 import com.example.taskmanager.util.DateUtil;
+import com.example.taskmanager.view_model.TaskViewModel;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -25,6 +28,7 @@ import com.google.android.material.navigation.NavigationBarView;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private SearchFragment searchFragment;
     private MaterialDatePicker<Long> datePicker;
     private Menu menu;
+    private MenuItem menuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,14 +63,23 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        menuItem = menu.getItem(0);
+        if(areThereLateTasks()){
+            menuItem.setIcon(R.drawable.ic_baseline_warning_red_24);
+        }else menuItem.setIcon(R.drawable.ic_baseline_warning_24);
         return super.onCreateOptionsMenu(menu);
     }
 
+    @SuppressLint("ResourceType")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.calendarButton) showCalendar();
         else if(id == R.id.refreshButton) updateFromWeb();
+        else if(id == R.id.warningButton) {
+            Intent lateActivity = new Intent(MainActivity.this, LateTaskActivity.class);
+            startActivity(lateActivity);
+        }
         return super.onOptionsItemSelected(item);
     }
 
@@ -96,15 +110,15 @@ public class MainActivity extends AppCompatActivity {
         return item -> {
             if(item.getTitle() == getResources().getString(R.string.day)) {
                 setCurrentFragment(dayFragment);
-                menu.getItem(0).setVisible(true);
+                menu.getItem(1).setVisible(true);
                 return true;
             } else if(item.getTitle() == getResources().getString(R.string.periods)){
                 setCurrentFragment(periodsFragment);
-                menu.getItem(0).setVisible(false);
+                menu.getItem(1).setVisible(false);
                 return true;
             } else if(item.getTitle() == getResources().getString(R.string.search)){
                 setCurrentFragment(searchFragment);
-                menu.getItem(0).setVisible(false);
+                menu.getItem(1).setVisible(false);
                 return true;
             }else return false;
         };
@@ -150,5 +164,25 @@ public class MainActivity extends AppCompatActivity {
         transaction.replace(R.id.fragment, fragment);
         transaction.commit();
         currentFragment = (AppFragment) fragment;
+    }
+
+    public boolean areThereLateTasks(){
+        TaskViewModel viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        return !Objects.requireNonNull(viewModel.getGetLateTasks().getValue()).isEmpty();
+    }
+
+    public void updateMenu(){
+        if (menu != null) {
+            menuItem = menu.getItem(0);
+            if (areThereLateTasks()) {
+                menuItem.setIcon(R.drawable.ic_baseline_warning_red_24);
+            } else menuItem.setIcon(R.drawable.ic_baseline_warning_24);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateMenu();
     }
 }

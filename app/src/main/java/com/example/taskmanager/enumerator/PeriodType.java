@@ -8,4 +8,5 @@ public enum PeriodType implements AppEnum {
     _3_MONTHS,
     _6_MONTHS,
     _1_YEAR,
+    _LATE
 }

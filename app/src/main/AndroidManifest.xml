@@ -36,6 +36,11 @@
             android:exported="true"
             android:label="Modify/Delete task">
         </activity>
+        <activity
+            android:name=".LateTaskActivity"
+            android:exported="true"
+            android:label="Late tasks">
+        </activity>
     </application>
 
 </manifest>

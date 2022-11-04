@@ -1,5 +1,6 @@
 package com.example.taskmanager.fragment;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,8 +19,10 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.TaskAdapter;
+import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.enumerator.OrderType;
 import com.example.taskmanager.enumerator.PeriodType;
 import com.example.taskmanager.model.Task;
@@ -35,6 +38,7 @@ public class PeriodsFragment extends Fragment implements AppFragment {
     private PeriodType periodType;
     private OrderType orderType;
     private Observer<List<Task>> currentObserver;
+    private static boolean isListModified = false;
 
     public PeriodsFragment(){
         periodType = PeriodType._3_DAY;
@@ -91,7 +95,7 @@ public class PeriodsFragment extends Fragment implements AppFragment {
     }
 
     private void addItemsToDropdowns(AutoCompleteTextView dropdownUntil, AutoCompleteTextView dropdownOrder){
-        String[] itemsUntil = new String[] { get(R.string._3_days), get(R.string._1_week), get(R.string._2_weeks), get(R.string._1_month), get(R.string._3_months), get(R.string._6_months)};
+        String[] itemsUntil = new String[] {  get(R.string._3_days), get(R.string._1_week), get(R.string._2_weeks), get(R.string._1_month), get(R.string._3_months), get(R.string._6_months)};
         ArrayAdapter<String> adapterUntil = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_dropdown_item_1line, itemsUntil);
         dropdownUntil.setAdapter(adapterUntil);
         dropdownUntil.setText(dropdownUntil.getAdapter().getItem(0).toString(), false);
@@ -103,19 +107,19 @@ public class PeriodsFragment extends Fragment implements AppFragment {
 
     private AdapterView.OnItemClickListener dropdownUntilAction() {
         return (parent, view, position, id) -> {
-                if (id == 0) {
-                    periodType = PeriodType._3_DAY;
-                } else if (id == 1) {
-                    periodType = PeriodType._1_WEEK;
-                } else if (id == 2) {
-                    periodType = PeriodType._2_WEEKS;
-                } else if (id == 3) {
-                    periodType = PeriodType._1_MONTH;
-                } else if (id == 4) {
-                    periodType = PeriodType._3_MONTHS;
-                } else if (id == 5) {
-                    periodType = PeriodType._6_MONTHS;
-                }
+            if (id == 0) {
+                periodType = PeriodType._3_DAY;
+            } else if (id == 1) {
+                periodType = PeriodType._1_WEEK;
+            } else if (id == 2) {
+                periodType = PeriodType._2_WEEKS;
+            } else if (id == 3) {
+                periodType = PeriodType._1_MONTH;
+            } else if (id == 4) {
+                periodType = PeriodType._3_MONTHS;
+            } else if (id == 5) {
+                periodType = PeriodType._6_MONTHS;
+            }
             updateUI();
         };
     }
@@ -133,5 +137,43 @@ public class PeriodsFragment extends Fragment implements AppFragment {
 
     private String get(@StringRes int id){
         return getResources().getString(id);
+    }
+
+    @Override
+    public boolean isListModified(){
+        return isListModified;
+    }
+
+    @Override
+    public void setListModified(){
+        isListModified = true;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        System.out.println("ATTACHED PERIODS");
+        isListModified = false;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        System.out.println("DETACHED PERIODS");
+        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        System.out.println("STOPPED PERIODS");
+        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        System.out.println("RESUMED PERIODS");
+        ((MainActivity) requireActivity()).updateMenu();
     }
 }

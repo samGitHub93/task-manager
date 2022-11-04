@@ -21,6 +21,7 @@ public class TaskViewModel extends AndroidViewModel {
     private MutableLiveData<List<Task>> getTasksByTitleOrTextOrDateLiveData;
     private MutableLiveData<List<Task>> getTasksByDateLiveData;
     private MutableLiveData<List<Task>> getTasksByPeriodLiveData;
+    private MutableLiveData<List<Task>> getLateTasksLiveData;
 
     public TaskViewModel(@NonNull Application application) {
         super(application);
@@ -57,6 +58,14 @@ public class TaskViewModel extends AndroidViewModel {
             getTasksByTitleOrTextOrDateLiveData = taskRepository.getTasksByTitleOrTextOrDate(getTasksByTitleOrTextOrDateLiveData, typing);
         }
         return taskRepository.getTasksByTitleOrTextOrDate(getTasksByTitleOrTextOrDateLiveData, typing);
+    }
+
+    public MutableLiveData<List<Task>> getGetLateTasks(){
+        if (getLateTasksLiveData == null) {
+            getLateTasksLiveData = new MutableLiveData<>();
+            getLateTasksLiveData = taskRepository.getLateTasks(getLateTasksLiveData);
+        }
+        return taskRepository.getLateTasks(getLateTasksLiveData);
     }
 
     public void insertTask(Task task){

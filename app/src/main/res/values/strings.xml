@@ -28,6 +28,7 @@
     <string name="cancel_dialog">Cancel</string>
 
     <!-- PERIOD TYPE -->
+    <string name="_late_task">Late tasks</string>
     <string name="_3_days">3 days</string>
     <string name="_1_week">1 week</string>
     <string name="_2_weeks">2 weeks</string>

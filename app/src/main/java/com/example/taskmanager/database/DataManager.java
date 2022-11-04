@@ -2,6 +2,7 @@ package com.example.taskmanager.database;
 
 import android.app.Application;
 import android.content.Context;
+import android.os.Looper;
 import android.widget.Toast;
 
 import com.example.taskmanager.BuildConfig;
@@ -44,6 +45,7 @@ public class DataManager {
 
     public void synchronizeFromRoom() {
         ThreadUtil.runSynchronizedTask(new Thread(() -> {
+            Looper.prepare();
             List<Task> tasks = database.taskDao().getAll();
             writePublicExternalCsv(tasks);
             readPublicExternalCsv();
@@ -53,6 +55,7 @@ public class DataManager {
 
     public void synchronizeFromWeb() {
         ThreadUtil.runSynchronizedTask(new Thread(() -> {
+            Looper.prepare();
             readPublicExternalCsv();
             List<Task> tasks = database.taskDao().getAll();
             writePublicExternalCsv(tasks);
