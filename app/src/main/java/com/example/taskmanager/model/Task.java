@@ -25,13 +25,16 @@ public class Task {
     private PriorityType priorityType;
     @ColumnInfo(name = "recurring_type")
     private RecurringType recurringType;
+    private String recurringUntil;
     @ColumnInfo(name = "is_done")
     private boolean isDone;
+    @ColumnInfo(name = "notify")
+    private String notify;
 
     public Task() {}
 
     @Ignore
-    public Task(String title, String text, String date, PriorityType priorityType, RecurringType recurringType, boolean isDone) {
+    public Task(String title, String text, String date, PriorityType priorityType, RecurringType recurringType, String recurringUntil, boolean isDone, String notify) {
         Random random = new Random();
         this.id = random.nextInt((999999999-1) + 1);
         this.title = title;
@@ -39,17 +42,44 @@ public class Task {
         this.date = date;
         this.priorityType = priorityType;
         this.recurringType = recurringType;
+        this.recurringUntil = recurringUntil;
         this.isDone = isDone;
+        this.notify = notify;
     }
 
     @Ignore
-    public Task(long id, String title, String text, String date, PriorityType priorityType, RecurringType recurringType, boolean isDone) {
+    public Task(long id, String title, String text, String date, PriorityType priorityType, RecurringType recurringType, String recurringUntil, boolean isDone, String notify) {
         this.id = id;
         this.title = title;
         this.text = text;
         this.date = date;
         this.priorityType = priorityType;
         this.recurringType = recurringType;
+        this.recurringUntil = recurringUntil;
+        this.isDone = isDone;
+        this.notify = notify;
+    }
+
+    @Ignore
+    public Task(long id, String title, String text, String date, PriorityType priorityType, RecurringType recurringType, String recurringUntil, boolean isDone) {
+        this.id = id;
+        this.title = title;
+        this.text = text;
+        this.date = date;
+        this.priorityType = priorityType;
+        this.recurringType = recurringType;
+        this.recurringUntil = recurringUntil;
+        this.isDone = isDone;
+    }
+
+    @Ignore
+    public Task(String title, String text, String date, PriorityType priorityType, RecurringType recurringType, String recurringUntil, boolean isDone) {
+        this.title = title;
+        this.text = text;
+        this.date = date;
+        this.priorityType = priorityType;
+        this.recurringType = recurringType;
+        this.recurringUntil = recurringUntil;
         this.isDone = isDone;
     }
 
@@ -107,5 +137,21 @@ public class Task {
 
     public void setDone(boolean done) {
         isDone = done;
+    }
+
+    public String getRecurringUntil() {
+        return recurringUntil;
+    }
+
+    public void setRecurringUntil(String recurringUntil) {
+        this.recurringUntil = recurringUntil;
+    }
+
+    public String getNotify() {
+        return notify;
+    }
+
+    public void setNotify(String notify) {
+        this.notify = notify;
     }
 }

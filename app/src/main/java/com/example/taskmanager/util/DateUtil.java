@@ -2,19 +2,36 @@ package com.example.taskmanager.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class DateUtil {
 
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy", Locale.ITALIAN);
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("EEEE dd MMMM yyyy", Locale.ITALIAN);
+    private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("EEEE dd MMMM yyyy HH:mm", Locale.ITALIAN);
+    private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.ITALIAN);
 
     public static SimpleDateFormat getFormatter(){
         return formatter;
+    }
+
+    public static SimpleDateFormat getDateTimeFormatter(){
+        return dateTimeFormatter;
+    }
+    public static SimpleDateFormat getTimeFormatter(){
+        return timeFormatter;
     }
 
     public static List<Date> getDatesBetween(Date startDate, Date endDate) {
@@ -74,5 +91,24 @@ public class DateUtil {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar;
+    }
+
+    public static long nowInMillis(){
+        return Instant.now().atZone(ZoneId.of("Europe/Rome")).toEpochSecond()*1000;
+    }
+
+    public static ZonedDateTime fromMillisToZonedDateTime(long millis){
+        Instant instant = Instant.ofEpochMilli(millis);
+        return ZonedDateTime.ofInstant(instant, ZoneId.of("Europe/Rome"));
+    }
+
+    public static long fromStringToMillis(String dateString){
+        try {
+            SimpleDateFormat dateFormat = getDateTimeFormatter();
+            return Objects.requireNonNull(dateFormat.parse(dateString)).getTime();
+        }catch(ParseException | NullPointerException | AssertionError e){
+            e.printStackTrace();
+            return 0;
+        }
     }
 }

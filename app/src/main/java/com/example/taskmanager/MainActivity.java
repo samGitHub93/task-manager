@@ -6,12 +6,18 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import com.example.taskmanager.database.AppDatabase;
 import com.example.taskmanager.database.DataManager;
@@ -21,6 +27,7 @@ import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_model.TaskViewModel;
+import com.example.taskmanager.worker.UpdateWorker;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -30,12 +37,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskActivity {
 
     public AppDatabase database;
     public static AppFragment currentFragment;
     public static FragmentManager fragmentManager;
+    public ProgressBar progressBar;
     private DataManager dataManager;
     private DayFragment dayFragment;
     private PeriodsFragment periodsFragment;
@@ -48,15 +58,17 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        progressBar = findViewById(R.id.progressBar);
         database = AppDatabase.getDatabase(this);
         dataManager = DataManager.getInstance(getApplication());
-        dataManager.synchronizeFromWeb();
+        updateFromWeb();
         fragmentManager = getSupportFragmentManager();
         initFragments();
         initNavigationButton();
         initFloatingButton();
         initCalendar();
-        setCurrentFragment(dayFragment);
+        setCurrentFragment(periodsFragment);
+        triggerUpdateWorker();
     }
 
     @Override
@@ -67,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
         if(areThereLateTasks()){
             menuItem.setIcon(R.drawable.ic_baseline_warning_red_24);
         }else menuItem.setIcon(R.drawable.ic_baseline_warning_24);
+        if(currentFragment instanceof PeriodsFragment || currentFragment instanceof SearchFragment)
+            this.menu.getItem(1).setVisible(false);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -94,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initNavigationButton(){
         NavigationBarView navigationBarView = findViewById(R.id.bottom_navigation);
+        navigationBarView.setSelectedItemId(R.id.page_2);
         navigationBarView.setOnItemSelectedListener(bottomNavigationAction());
     }
 
@@ -126,10 +141,13 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateFromWeb(){
         try {
-            Thread.sleep(1000);
-            dataManager.synchronizeFromWeb();
-            currentFragment.updateUI();
-        } catch (InterruptedException e) {
+            if(dataManager.isActiveConnection(MainActivity.this).get()){
+                dataManager.synchronizeFromWeb(MainActivity.this);
+                if (currentFragment != null)
+                    currentFragment.updateUI();
+            }else
+                Toast.makeText(this, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
+        } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -176,7 +194,8 @@ public class MainActivity extends AppCompatActivity {
             menuItem = menu.getItem(0);
             if (areThereLateTasks()) {
                 menuItem.setIcon(R.drawable.ic_baseline_warning_red_24);
-            } else menuItem.setIcon(R.drawable.ic_baseline_warning_24);
+            } else
+                menuItem.setIcon(R.drawable.ic_baseline_warning_24);
         }
     }
 
@@ -184,5 +203,36 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateMenu();
+        updateUI();
+    }
+
+    private void triggerUpdateWorker(){
+        WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        WorkManager.getInstance(this).enqueue(workRequest);
+    }
+
+    @Override
+    public void updateUI(){
+        currentFragment.updateUI();
+    }
+
+    @Override
+    public void enableProgressBar() {
+        progressBar.setVisibility(View.VISIBLE);
+    }
+
+    @Override
+    public void disableProgressBar() {
+        progressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void disableTouch() {
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    @Override
+    public void enableTouch() {
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 }

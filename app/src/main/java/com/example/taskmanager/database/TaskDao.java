@@ -37,6 +37,6 @@ public interface TaskDao {
     @Delete
     void delete(Task task);
 
-    @Update
+    @Update(onConflict = OnConflictStrategy.REPLACE)
     void update(Task task);
 }

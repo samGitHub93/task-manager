@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base Theme -->
     <style name="Theme.TaskManager" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <!-- Primary brand color. -->
@@ -12,6 +12,7 @@
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
+        <item name="android:forceDarkAllowed" tools:targetApi="q">false</item>
     </style>
 
     <!-- Calendar Theme -->
@@ -27,6 +28,16 @@
     <style name="ThemeOverlay.App.BottomNavigationView" parent="">
         <item name="colorPrimary">@color/gray_huge</item>
         <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <!-- Confirm Dialog -->
+    <style name="Theme.MaterialComponents.Light.Dialog.Alert" parent="Theme.MaterialComponents.Light.Dialog">
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.AppCompat.Dialog.Alert</item>
+    </style>
+    <style name="ThemeOverlay.AppCompat.Dialog.Alert" parent="">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
+        <item name="colorSurface">@color/white</item>
     </style>
 
 </resources>

@@ -1,7 +1,8 @@
 package com.example.taskmanager.fragment;
 
-public interface AppFragment {
+import com.example.taskmanager.TaskActivity;
+
+public interface AppFragment extends TaskActivity {
     boolean isListModified();
     void setListModified();
-    void updateUI();
 }

@@ -1,9 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:translationZ="10dp"
+        android:layout_centerInParent="true"
+        android:indeterminateTint="@color/white"
+        android:visibility="invisible"/>
 
     <ScrollView
         android:id="@+id/scroll"
@@ -33,13 +45,13 @@
                 android:padding="5dp"
                 android:layout_margin="10dp"
                 android:layout_marginTop="10dp">
-                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                <com.example.taskmanager.view_item.TaskTextView
                     android:id="@+id/title_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@color/gray_very_huge"
                     android:textColor="@color/white">
-                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                </com.example.taskmanager.view_item.TaskTextView>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -47,6 +59,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/details_label"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
                 android:textColor="@color/white">
             </TextView>
             <com.google.android.material.textfield.TextInputLayout
@@ -54,14 +67,14 @@
                 android:layout_height="wrap_content"
                 android:padding="5dp"
                 android:layout_margin="10dp">
-                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                <com.example.taskmanager.view_item.TaskTextView
                     android:id="@+id/details_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minLines="3"
                     android:background="@color/gray_very_huge"
                     android:textColor="@color/white">
-                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                </com.example.taskmanager.view_item.TaskTextView>
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -70,9 +83,10 @@
                 android:layout_height="wrap_content"
                 android:text="@string/date_label"
                 android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
                 android:textColor="@color/white">
             </TextView>
-            <com.google.android.material.textfield.TextInputEditText
+            <com.example.taskmanager.view_item.DateTextView
                 android:id="@+id/date_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -85,15 +99,24 @@
                 android:inputType="none"
                 android:focusable="false"
                 android:autofillHints="">
-            </com.google.android.material.textfield.TextInputEditText>
+            </com.example.taskmanager.view_item.DateTextView>
 
+            <TextView
+                android:id="@+id/label_priority"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/priority_label_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white">
+            </TextView>
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="10dp"
                 android:padding="5dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
-                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
+                <com.example.taskmanager.view_item.DropDown
                     android:id="@+id/priority_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -101,25 +124,105 @@
                     android:background="@color/gray_lite"
                     android:textColor="@color/gray_very_huge"
                     android:hint="@string/priority_label">
-                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
+                </com.example.taskmanager.view_item.DropDown>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.textfield.TextInputLayout
+            <TextView
+                android:id="@+id/label_recurring"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
-                android:padding="5dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
-                <androidx.appcompat.widget.AppCompatAutoCompleteTextView
-                    android:id="@+id/recurring_text_view"
+                android:text="@string/recurring_label_text"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white">
+            </TextView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+                <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:enabled="false"
-                    android:background="@color/gray_lite"
-                    android:textColor="@color/gray_very_huge"
-                    android:hint="@string/recurring_label">
-                </androidx.appcompat.widget.AppCompatAutoCompleteTextView>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:layout_margin="10dp"
+                    android:layout_weight="1"
+                    android:padding="5dp"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+                    <com.example.taskmanager.view_item.DropDown
+                        android:id="@+id/recurring_text_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:enabled="false"
+                        android:background="@color/gray_lite"
+                        android:textColor="@color/gray_very_huge"
+                        android:hint="@string/none_hint">
+                    </com.example.taskmanager.view_item.DropDown>
+                </com.google.android.material.textfield.TextInputLayout>
+                <com.example.taskmanager.view_item.DateTextView
+                    android:id="@+id/until_text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:padding="5dp"
+                    android:hint="@string/until_none"
+                    android:textColorHint="@color/gray"
+                    android:background="@color/gray_very_huge"
+                    android:textColor="@color/white"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:autofillHints="">
+                </com.example.taskmanager.view_item.DateTextView>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/label_notify"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/notification_label"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/white">
+            </TextView>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal"
+                android:baselineAligned="false">
+                <com.example.taskmanager.view_item.DateTextView
+                    android:id="@+id/notify_text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_margin="10dp"
+                    android:padding="5dp"
+                    android:hint="@string/date_none"
+                    android:textColorHint="@color/gray"
+                    android:background="@color/gray_very_huge"
+                    android:textColor="@color/white"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:autofillHints="">
+                </com.example.taskmanager.view_item.DateTextView>
+                <com.example.taskmanager.view_item.TimeTextView
+                    android:id="@+id/notify_time_text_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_gravity="center"
+                    android:layout_margin="10dp"
+                    android:padding="5dp"
+                    android:hint="@string/time_none"
+                    android:textColorHint="@color/gray"
+                    android:background="@color/gray_very_huge"
+                    android:textColor="@color/white"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:autofillHints="">
+                </com.example.taskmanager.view_item.TimeTextView>
+            </LinearLayout>
 
         </LinearLayout>
 
@@ -131,32 +234,33 @@
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="60dp"
-        android:gravity="center"
+        android:layout_alignParentBottom="true"
         android:background="@color/gray_very_huge">
 
         <Button
             android:id="@+id/modify_button"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:backgroundTint="@color/white"
             android:textColor="@color/black"
             android:text="@string/modify_button_label"
             android:layout_gravity="center"
-            android:layout_margin="8dp"
+            android:layout_margin="10dp"
             style="?android:attr/buttonBarButtonStyle">
         </Button>
 
         <Button
             android:id="@+id/delete_button"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:backgroundTint="@color/red"
             android:textColor="@color/black"
             android:text="@string/delete_button_label"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
+            android:layout_margin="10dp"
             style="?android:attr/buttonBarButtonStyle">
         </Button>
 
     </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

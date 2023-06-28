@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.SearchView;
 
@@ -20,7 +21,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.TaskAdapter;
-import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.TaskSorter;
@@ -129,23 +129,29 @@ public class SearchFragment extends Fragment implements AppFragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        System.out.println("DETACHED SEARCH");
-        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        System.out.println("STOPPED SEARCH");
-        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED SEARCH");
         ((MainActivity) requireActivity()).updateMenu();
+    }
+
+    @Override
+    public void enableProgressBar() {
+        ((MainActivity) requireActivity()).enableProgressBar();
+    }
+
+    @Override
+    public void disableProgressBar() {
+        ((MainActivity) requireActivity()).disableProgressBar();
+    }
+
+    @Override
+    public void disableTouch() {
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    @Override
+    public void enableTouch() {
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 }

@@ -86,6 +86,11 @@ public class TaskRepository {
         taskDao.update(task);
     }
 
+    public MutableLiveData<List<Task>> getAll(MutableLiveData<List<Task>> mutableLiveData){
+        mutableLiveData.setValue(taskDao.getAll());
+        return mutableLiveData;
+    }
+
     private List<Task> getRawTasksByDate(String date){
         return new ArrayList<>(taskDao.getByDate(date));
     }

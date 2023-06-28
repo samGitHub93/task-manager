@@ -1,12 +1,14 @@
 package com.example.taskmanager.adapter;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -16,10 +18,12 @@ import com.example.taskmanager.R;
 import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_holder.ListViewHolder;
 import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements Adapter<Task> {
 
@@ -32,13 +36,13 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
         this.context = context;
         this.viewModel = viewModel;
         this.tasks = tasks;
-        dataManager = DataManager.getInstance(viewModel.getApplication());
+        this.dataManager = DataManager.getInstance(viewModel.getApplication());
     }
 
     @NonNull
     @Override
     public ListViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_view_line, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.list_view_square, viewGroup, false);
         return new ListViewHolder(view);
     }
 
@@ -47,15 +51,22 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
         viewHolder.getTextView1().setText(tasks.get(position).getTitle());
         viewHolder.getTextView2().setText(tasks.get(position).getText());
         viewHolder.getTextView3().setText(tasks.get(position).getDate());
+        viewHolder.getTextView4().setText("PRICE"); // TODO
         switchPriority(viewHolder, tasks.get(position).getPriorityType());
         viewHolder.getTextView1().setTextColor(Color.WHITE);
         viewHolder.getTextView2().setTextColor(Color.WHITE);
         viewHolder.getTextView3().setTextColor(Color.WHITE);
+        viewHolder.getTextView4().setTextColor(Color.WHITE);
+        String notify = tasks.get(position).getNotify();
+        if(notify.trim().length() == 0 || DateUtil.fromStringToMillis(notify) - DateUtil.nowInMillis() < 0)
+            viewHolder.getNotify().setImageResource(R.drawable.alarm_off);
+        else viewHolder.getNotify().setImageResource(R.drawable.alarm_on);
         if(tasks.get(position).isDone()) {
             viewHolder.getIcon().setImageResource(R.drawable.circle_checked);
             viewHolder.getTextView1().setTextColor(Color.GRAY);
             viewHolder.getTextView2().setTextColor(Color.GRAY);
             viewHolder.getTextView3().setTextColor(Color.GRAY);
+            viewHolder.getTextView4().setTextColor(Color.GRAY);
         }
         viewHolder.itemView.setOnClickListener(onClickAction(viewHolder));
     }
@@ -69,20 +80,38 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
     @SuppressLint("NotifyDataSetChanged")
     public void doneItem(int position){
         Task task = tasks.get(position);
-        task.setDone(true);
-        viewModel.updateTask(task);
-        dataManager.synchronizeFromRoom();
-        notifyDataSetChanged();
+        try {
+            if(dataManager.isActiveConnection((Activity) context).get()){
+                task.setDone(true);
+                viewModel.updateTask(task);
+                dataManager.synchronizeFromRoom((Activity) context, false);
+            } else {
+                Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show();
+            }
+            notifyDataSetChanged();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     @SuppressLint("NotifyDataSetChanged")
     public void undoneItem(int position){
         Task task = tasks.get(position);
-        task.setDone(false);
-        viewModel.updateTask(task);
-        dataManager.synchronizeFromRoom();
-        notifyDataSetChanged();
+        try {
+            if(dataManager.isActiveConnection((Activity) context).get()){
+                task.setDone(false);
+                viewModel.updateTask(task);
+                dataManager.synchronizeFromRoom((Activity) context, false);
+            } else {
+                Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show();
+            }
+            notifyDataSetChanged();
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

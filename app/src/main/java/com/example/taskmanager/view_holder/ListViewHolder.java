@@ -15,6 +15,8 @@ public class ListViewHolder extends RecyclerView.ViewHolder {
     private final TextView textView1;
     private final TextView textView2;
     private final TextView textView3;
+    private final TextView textView4;
+    private final ImageView notify;
 
     public ListViewHolder(@NonNull View view) {
         super(view);
@@ -22,6 +24,8 @@ public class ListViewHolder extends RecyclerView.ViewHolder {
         this.textView1 = view.findViewById(R.id.list_item_text_1);
         this.textView2 = view.findViewById(R.id.list_item_text_2);
         this.textView3 = view.findViewById(R.id.list_item_text_3);
+        this.textView4 = view.findViewById(R.id.list_item_text_4);
+        this.notify = view.findViewById(R.id.alarm);
     }
 
     public ImageView getIcon() {
@@ -38,5 +42,13 @@ public class ListViewHolder extends RecyclerView.ViewHolder {
 
     public TextView getTextView3() {
         return textView3;
+    }
+
+    public TextView getTextView4() {
+        return textView4;
+    }
+
+    public ImageView getNotify() {
+        return notify;
     }
 }

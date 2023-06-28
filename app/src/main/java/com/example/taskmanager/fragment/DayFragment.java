@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,10 +20,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.adapter.TaskAdapter;
-import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskSwiper;
 import com.example.taskmanager.util.DateUtil;
+import com.example.taskmanager.util.StringUtil;
 import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_model.TaskViewModel;
 
@@ -56,7 +57,7 @@ public class DayFragment extends Fragment implements AppFragment {
     public void updateUI() {
         if(currentObserver != null) removeObserver(date, currentObserver);
         if(date == null) date = new Date();
-        textDate.setText(DateUtil.getFormatter().format(date));
+        textDate.setText(StringUtil.capFirstCharacter(DateUtil.getFormatter().format(date)));
         currentObserver = getNewObserver();
         viewModel.getTasksByDate(date).observe(getViewLifecycleOwner(), currentObserver);
     }
@@ -100,23 +101,30 @@ public class DayFragment extends Fragment implements AppFragment {
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        System.out.println("DETACHED DAY");
-        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        System.out.println("STOPPED DAY");
-        if(isListModified()) DataManager.getInstance(requireActivity().getApplication()).synchronizeFromRoom();
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED DAY");
         ((MainActivity) requireActivity()).updateMenu();
+        updateUI();
+    }
+
+    @Override
+    public void disableTouch() {
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    @Override
+    public void enableTouch() {
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    @Override
+    public void enableProgressBar() {
+        ((MainActivity) requireActivity()).enableProgressBar();
+    }
+
+    @Override
+    public void disableProgressBar() {
+        ((MainActivity) requireActivity()).disableProgressBar();
     }
 }

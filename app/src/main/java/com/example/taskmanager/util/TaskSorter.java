@@ -7,7 +7,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -23,7 +22,7 @@ public class TaskSorter {
     }
 
     public static List<Task> sortByDate(List<Task> tasks) {
-        Collections.sort(tasks, TaskSorter::compareByDate);
+        tasks.sort(TaskSorter::compareByDate);
         return tasks;
     }
 
