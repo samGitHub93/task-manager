@@ -24,7 +24,7 @@
         android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
         android:orientation="vertical"
-        android:background="@color/gray_very_huge">
+        android:background="@color/red_huge">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_late"

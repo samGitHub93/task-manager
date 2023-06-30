@@ -8,20 +8,15 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.work.Data;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.notification.Notifier;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
-import com.example.taskmanager.worker.NotificationWorker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 public class ModifyTaskActivity extends ProcessTaskActivity {
     private Task retrievedTask;
@@ -98,11 +93,9 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                     Toast.makeText(this, "Please, check notification date!", Toast.LENGTH_LONG).show();
                 }else {
                     if(task.getNotify().trim().length() != 0){
-                        WorkRequest workRequest = new OneTimeWorkRequest.Builder(NotificationWorker.class)
-                                        .setInitialDelay(DateUtil.fromStringToMillis(task.getNotify()) - DateUtil.nowInMillis(), TimeUnit.MILLISECONDS)
-                                        .setInputData(new Data.Builder().putLong("ID", task.getId()).putString("TITLE", task.getTitle()).putString("TEXT", task.getText()).putString("DATE", task.getDate()).build())
-                                        .build();
-                        WorkManager.getInstance(this).enqueue(workRequest);
+                        Notifier notifier = new Notifier();
+                        notifier.cancelAlarm(ModifyTaskActivity.this, task);
+                        notifier.createAlarm(ModifyTaskActivity.this, task);
                     }
                     getTaskViewModel().updateTask(task);
                     getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);

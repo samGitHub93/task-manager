@@ -22,7 +22,9 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TaskManager">
+        android:enableOnBackInvokedCallback="true"
+        android:theme="@style/Theme.TaskManager"
+        tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -46,6 +48,21 @@
             android:exported="true"
             android:label="Late tasks">
         </activity>
+        <receiver
+            android:name=".receiver.NotificationReceiver"
+            android:exported="true"
+            android:permission="android.permission.POST_NOTIFICATIONS">
+            <intent-filter>
+                <action android:name="NOTIFY" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".receiver.BootReceiver"
+            android:enabled="false"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
