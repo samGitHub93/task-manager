@@ -21,8 +21,7 @@ public class Notifier {
         Intent intent = prepareIntent();
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, Integer.parseInt(String.valueOf(task.getId())), intent, PendingIntent.FLAG_IMMUTABLE);
         long millis = DateUtil.fromStringToMillis(task.getNotify());
-        AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(millis, alarmIntent);
-        alarmManager.setAlarmClock(info, alarmIntent);
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, millis, alarmIntent);
     }
 
     public void cancelAlarm(Context context, Task task){

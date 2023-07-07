@@ -28,6 +28,7 @@ import com.example.taskmanager.fragment.SearchFragment;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_model.TaskViewModel;
 import com.example.taskmanager.worker.UpdateWorker;
+import com.example.taskmanager.worker.WorkObserver;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -68,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
         initFloatingButton();
         initCalendar();
         setCurrentFragment(periodsFragment);
+        WorkManager.getInstance(this).cancelAllWork();
         triggerUpdateWorker();
     }
 
@@ -209,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
     private void triggerUpdateWorker(){
         WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
         WorkManager.getInstance(this).enqueue(workRequest);
+        new WorkObserver().observe(this, workRequest.getId());
     }
 
     @Override

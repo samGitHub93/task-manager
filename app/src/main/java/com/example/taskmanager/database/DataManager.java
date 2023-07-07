@@ -29,10 +29,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class DataManager {
-    private final AppDatabase database;
-    private final Context context;
+    private AppDatabase database;
+    private Context context;
     private static DataManager instance;
-    private final GitHub gitHub;
+    private GitHub gitHub;
     private Git git;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -43,7 +43,7 @@ public class DataManager {
             gitHub = GitHub.getInstance(context);
             git = executor.submit(gitHub::getGit).get();
         } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -54,7 +54,7 @@ public class DataManager {
             gitHub = GitHub.getInstance(context);
             git = executor.submit(gitHub::getGit).get();
         } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -81,6 +81,7 @@ public class DataManager {
                 return result;
             } catch (Exception e) {
                 activity.runOnUiThread(() -> disableProgressBar(processAction));
+                e.printStackTrace();
                 return false;
             }
         });
@@ -122,17 +123,15 @@ public class DataManager {
         });
     }
 
-    public void synchronizeFromWeb() {
-        executor.submit(() -> {
+    public List<Task> synchronizeFromWeb() throws ExecutionException, InterruptedException {
+        return executor.submit(() -> {
             try {
-                List<Task> tasks = pullFromRemote();
-                saveToRoom(tasks);
-                return true;
+                return pullFromRemote();
             } catch (Exception e) {
                 e.printStackTrace();
-                return false;
+                return new ArrayList<Task>();
             }
-        });
+        }).get();
     }
 
     private void pushToRemote(List<Task> tasks) throws PushException {

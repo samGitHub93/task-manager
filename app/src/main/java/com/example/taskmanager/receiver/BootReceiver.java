@@ -9,6 +9,7 @@ import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import com.example.taskmanager.worker.UpdateWorker;
+import com.example.taskmanager.worker.WorkObserver;
 
 import java.util.concurrent.TimeUnit;
 
@@ -19,6 +20,7 @@ public class BootReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
             WorkManager.getInstance(context).enqueue(workRequest);
+            new WorkObserver().observe(context, workRequest.getId());
         }
     }
 }
