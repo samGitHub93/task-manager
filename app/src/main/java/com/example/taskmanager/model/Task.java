@@ -25,6 +25,7 @@ public class Task {
     private PriorityType priorityType;
     @ColumnInfo(name = "recurring_type")
     private RecurringType recurringType;
+    @ColumnInfo(name = "recurring_until")
     private String recurringUntil;
     @ColumnInfo(name = "is_done")
     private boolean isDone;

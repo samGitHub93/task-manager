@@ -32,7 +32,7 @@ public class UpdateWorker extends Worker {
                 allTasks.forEach(task -> {
                     notifier.cancelAlarm(getApplicationContext(), task);
                     notifier.createAlarm(getApplicationContext(), task);
-                    Log.i("INFO WORKER", task.getTitle());
+                    Log.i("INFO WORKER", "Uploaded task with TITLE = " + task.getTitle());
                 });
                 return Result.success();
             }
@@ -46,7 +46,7 @@ public class UpdateWorker extends Worker {
     public boolean filter(Task task){
         return  task.getNotify().trim().length() == 0 ||
                 task.isDone() ||
-                DateUtil.fromStringToMillis(task.getNotify()) + (1000*60*60*24) < DateUtil.nowInMillis() ||
+                DateUtil.fromStringToMillis(task.getNotify()) + (1000*60*60) < DateUtil.nowInMillis() ||
                 DateUtil.fromStringToMillis(task.getNotify()) > DateUtil.nowInMillis() + (1000*60*60*24*3);
     }
 }
