@@ -7,3 +7,4 @@
 /captures
 .externalNativeBuild
 /app/src/main/res/values/secrets.xml
+/app/src/main/res/values-night/secrets.xml
