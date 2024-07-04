@@ -1,15 +1,15 @@
 package com.example.taskmanager.util;
 
+import android.util.Log;
+
+import com.example.taskmanager.receiver.NotificationReceiver;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -107,7 +107,7 @@ public class DateUtil {
             SimpleDateFormat dateFormat = getDateTimeFormatter();
             return Objects.requireNonNull(dateFormat.parse(dateString)).getTime();
         }catch(ParseException | NullPointerException | AssertionError e){
-            e.printStackTrace();
+            Log.e(DateUtil.class.getName(), e.getMessage(), e);
             return 0;
         }
     }

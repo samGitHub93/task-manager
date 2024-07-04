@@ -1,15 +1,10 @@
 package com.example.taskmanager.view_item;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.ArrayAdapter;
 
-import androidx.annotation.IdRes;
 import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
-
-import com.example.taskmanager.ProcessTaskAction;
-import com.example.taskmanager.ProcessTaskActivity;
 
 public class DropDown extends AppCompatAutoCompleteTextView {
 

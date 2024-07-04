@@ -1,9 +1,11 @@
 package com.example.taskmanager.database;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.taskmanager.BuildConfig;
 import com.example.taskmanager.R;
+import com.example.taskmanager.receiver.NotificationReceiver;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -40,7 +42,7 @@ public class GitHub {
                 throw new IOException("Could not delete temporary file " + localPath);
             git = cloneCommand.setDirectory(localPath).call();
         } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
+            Log.e(GitHub.class.getName(), e.getMessage(), e);
         }
         return git;
     }

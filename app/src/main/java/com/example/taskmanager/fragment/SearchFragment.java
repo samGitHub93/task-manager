@@ -55,7 +55,7 @@ public class SearchFragment extends Fragment implements AppFragment {
 
     public void updateUI(){
         if(currentObserver!=null) removeObserver(query, currentObserver);
-        if(query.length() == 0) query = INITIAL_VALUE;
+        if(query.isEmpty()) query = INITIAL_VALUE;
         currentObserver = getNewObserver();
         viewModel.getTasksByTitleOrTextOrDate(query).observe(getViewLifecycleOwner(), currentObserver);
     }

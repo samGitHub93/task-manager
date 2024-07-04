@@ -3,6 +3,7 @@ package com.example.taskmanager;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -25,6 +26,7 @@ import com.example.taskmanager.fragment.AppFragment;
 import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
+import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_model.TaskViewModel;
 import com.example.taskmanager.worker.UpdateWorker;
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
             }else
                 Toast.makeText(this, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            Log.e(MainActivity.class.getName(), e.getMessage(), e);
         }
     }
 

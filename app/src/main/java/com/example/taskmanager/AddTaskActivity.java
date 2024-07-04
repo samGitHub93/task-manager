@@ -1,6 +1,7 @@
 package com.example.taskmanager;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -11,6 +12,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
+import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
 
@@ -65,7 +67,7 @@ public class AddTaskActivity extends ProcessTaskActivity {
                 }else if(!isValidNotificationDate(task)){
                     Toast.makeText(this, "Please, check notification date!", Toast.LENGTH_LONG).show();
                 }else {
-                    if(task.getNotify().trim().length() != 0){
+                    if(!task.getNotify().trim().isEmpty()){
                         Notifier notifier = new Notifier();
                         notifier.cancelAlarm(AddTaskActivity.this, task);
                         notifier.createAlarm(AddTaskActivity.this, task);
@@ -74,15 +76,15 @@ public class AddTaskActivity extends ProcessTaskActivity {
                     getDataManager().synchronizeFromRoom(AddTaskActivity.this, true);
                 }
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(AddTaskActivity.class.getName(), e.getMessage(), e);
             }
         };
     }
 
     private boolean isValidNotificationDate(Task task){
         if(
-                (DateUtil.fromStringToMillis(task.getNotify()) == 0 && task.getNotify().trim().length() != 0) ||
-                        (task.getNotify().trim().length() != 0 && DateUtil.fromStringToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
+                (DateUtil.fromStringToMillis(task.getNotify()) == 0 && !task.getNotify().trim().isEmpty()) ||
+                        (!task.getNotify().trim().isEmpty() && DateUtil.fromStringToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
                         (Objects.requireNonNull(getTaskNotifyDate().getText()).toString().equals(EMPTY_STRING) && !Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING)) ||
                         (!getTaskNotifyDate().getText().toString().equals(EMPTY_STRING)&& Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING))){
             getTaskNotifyDate().setBackgroundColor(ContextCompat.getColor(this, R.color.red_lite));

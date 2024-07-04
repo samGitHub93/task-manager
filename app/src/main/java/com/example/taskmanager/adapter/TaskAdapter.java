@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.example.taskmanager.R;
 import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_holder.ListViewHolder;
 import com.example.taskmanager.view_model.TaskViewModel;
@@ -58,7 +60,7 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
         viewHolder.getTextView3().setTextColor(Color.WHITE);
         viewHolder.getTextView4().setTextColor(Color.WHITE);
         String notify = tasks.get(position).getNotify();
-        if(notify.trim().length() == 0 || DateUtil.fromStringToMillis(notify) - DateUtil.nowInMillis() < 0)
+        if(notify.trim().isEmpty() || DateUtil.fromStringToMillis(notify) - DateUtil.nowInMillis() < 0)
             viewHolder.getNotify().setImageResource(R.drawable.alarm_off);
         else viewHolder.getNotify().setImageResource(R.drawable.alarm_on);
         if(tasks.get(position).isDone()) {
@@ -90,7 +92,7 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
             }
             notifyDataSetChanged();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TaskAdapter.class.getName(), e.getMessage(), e);
         } catch (ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -110,7 +112,7 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
             }
             notifyDataSetChanged();
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            Log.e(TaskAdapter.class.getName(), e.getMessage(), e);
         }
     }
 

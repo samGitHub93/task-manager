@@ -1,6 +1,7 @@
 package com.example.taskmanager;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -11,6 +12,7 @@ import androidx.core.content.ContextCompat;
 
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
+import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -57,7 +59,7 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
             getTaskRecurring().setText(retrievedTask.getRecurringType().toString(), false);
             getTaskRecurringUntil().setText(retrievedTask.getRecurringUntil());
             String notify = retrievedTask.getNotify();
-            if(retrievedTask.getNotify().trim().length() != 0){
+            if(!retrievedTask.getNotify().trim().isEmpty()){
                 getTaskNotifyDate().setText(notify.substring(0, notify.indexOf(":") - 3));
                 getTaskNotifyTime().setText(notify.substring(notify.indexOf(":") - 2));
             }
@@ -92,7 +94,7 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                 }else if(!isValidNotificationDate(task)){
                     Toast.makeText(this, "Please, check notification date!", Toast.LENGTH_LONG).show();
                 }else {
-                    if(task.getNotify().trim().length() != 0){
+                    if(!task.getNotify().trim().isEmpty()){
                         Notifier notifier = new Notifier();
                         notifier.cancelAlarm(ModifyTaskActivity.this, task);
                         notifier.createAlarm(ModifyTaskActivity.this, task);
@@ -101,7 +103,7 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                     getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
                 }
             } catch (ExecutionException | InterruptedException e) {
-                e.printStackTrace();
+                Log.e(ModifyTaskActivity.class.getName(), e.getMessage(), e);
             }
         };
     }
@@ -122,14 +124,14 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                 getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
             }
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            Log.e(ModifyTaskActivity.class.getName(), e.getMessage(), e);
         }
     }
 
     private boolean isValidNotificationDate(Task task){
         if(
-                (DateUtil.fromStringToMillis(task.getNotify()) == 0 && task.getNotify().trim().length() != 0) ||
-                        (task.getNotify().trim().length() != 0 && DateUtil.fromStringToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
+                (DateUtil.fromStringToMillis(task.getNotify()) == 0 && !task.getNotify().trim().isEmpty()) ||
+                        (!task.getNotify().trim().isEmpty() && DateUtil.fromStringToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
                         (Objects.requireNonNull(getTaskNotifyDate().getText()).toString().equals(EMPTY_STRING) && !Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING)) ||
                         (!getTaskNotifyDate().getText().toString().equals(EMPTY_STRING)&& Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING))){
             getTaskNotifyDate().setBackgroundColor(ContextCompat.getColor(this, R.color.red_lite));

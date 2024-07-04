@@ -3,6 +3,7 @@ package com.example.taskmanager.database;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import com.example.taskmanager.ProcessTaskAction;
 import com.example.taskmanager.R;
@@ -43,7 +44,7 @@ public class DataManager {
             gitHub = GitHub.getInstance(context);
             git = executor.submit(gitHub::getGit).get();
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
         }
     }
 
@@ -54,7 +55,7 @@ public class DataManager {
             gitHub = GitHub.getInstance(context);
             git = executor.submit(gitHub::getGit).get();
         } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
         }
     }
 
@@ -81,7 +82,7 @@ public class DataManager {
                 return result;
             } catch (Exception e) {
                 activity.runOnUiThread(() -> disableProgressBar(processAction));
-                e.printStackTrace();
+                Log.e(DataManager.class.getName(), e.getMessage(), e);
                 return false;
             }
         });
@@ -100,7 +101,7 @@ public class DataManager {
                 return true;
             } catch (Exception e) {
                 activity.runOnUiThread(() -> disableProgressBar(processAction));
-                e.printStackTrace();
+                Log.e(DataManager.class.getName(), e.getMessage(), e);
                 return false;
             }
         });
@@ -117,7 +118,7 @@ public class DataManager {
                 return true;
             } catch (Exception e) {
                 activity.runOnUiThread(() -> disableProgressBar(processAction));
-                e.printStackTrace();
+                Log.e(DataManager.class.getName(), e.getMessage(), e);
                 return false;
             }
         });
@@ -128,7 +129,7 @@ public class DataManager {
             try {
                 return pullFromRemote();
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.e(DataManager.class.getName(), e.getMessage(), e);
                 return new ArrayList<Task>();
             }
         }).get();
@@ -147,7 +148,7 @@ public class DataManager {
             git.commit().setAll(true).setMessage("Commit changes to all files").call();
             git.push().setCredentialsProvider(gitHub.getCredentials()).call();
         } catch (IOException | GitAPIException e) {
-            e.printStackTrace();
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
             throw new PushException();
         }
     }
@@ -159,7 +160,7 @@ public class DataManager {
                 return tasks;
             else throw new PullException();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
             throw new PullException();
         }
     }
@@ -182,6 +183,7 @@ public class DataManager {
             reader.close();
             FileUtils.delete(gitFolder);
         }catch (IOException e){
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
             FileUtils.delete(gitFolder);
             throw new IOException();
         }

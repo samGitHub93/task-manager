@@ -6,6 +6,7 @@ import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.example.taskmanager.R;
 import com.example.taskmanager.exception.NotValidTaskException;
@@ -32,7 +33,7 @@ public class NotificationReceiver extends BroadcastReceiver {
             notificationManager.createNotificationChannel(channel);
             notificationManager.notify(Integer.parseInt(id), notification);
         }catch (NotValidTaskException e){
-            e.printStackTrace();
+            Log.e(NotificationReceiver.class.getName(), e.getMessage(), e);
         }
     }
 
