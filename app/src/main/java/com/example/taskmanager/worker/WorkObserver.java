@@ -14,7 +14,22 @@ import java.util.concurrent.TimeUnit;
 
 public class WorkObserver {
 
-    public void observe(Context context, UUID id) {
+    private static WorkObserver INSTANCE;
+    private final Context context;
+
+    private WorkObserver(Context context){
+        this.context = context;
+    }
+
+    public static WorkObserver getInstance(Context context){
+        if(INSTANCE == null){
+            INSTANCE = new WorkObserver(context);
+            return INSTANCE;
+        }
+        return INSTANCE;
+    }
+
+    public void observe(UUID id) {
         WorkManager.getInstance(context).getWorkInfoByIdLiveData(id)
                 .observe((LifecycleOwner) context, workInfo -> {
                     if (workInfo.getState() == WorkInfo.State.CANCELLED) {
@@ -22,7 +37,7 @@ public class WorkObserver {
                         WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
                         WorkManager.getInstance(context).enqueue(workRequest);
                         Log.i("WORKER INFO", "New worker " + id + " started.");
-                        this.observe(context, workRequest.getId());
+                        this.observe(workRequest.getId());
                     }
                 });
     }

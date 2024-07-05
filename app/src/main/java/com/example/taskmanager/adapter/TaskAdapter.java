@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,7 +18,6 @@ import com.example.taskmanager.R;
 import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
-import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_holder.ListViewHolder;
 import com.example.taskmanager.view_model.TaskViewModel;
@@ -83,13 +81,9 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
     public void doneItem(int position){
         Task task = tasks.get(position);
         try {
-            if(dataManager.isActiveConnection((Activity) context).get()){
-                task.setDone(true);
-                viewModel.updateTask(task);
-                dataManager.synchronizeFromRoom((Activity) context, false);
-            } else {
-                Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show();
-            }
+            task.setDone(true);
+            viewModel.updateTask(task);
+            dataManager.synchronizeFromRoom((Activity) context, false);
             notifyDataSetChanged();
         } catch (InterruptedException e) {
             Log.e(TaskAdapter.class.getName(), e.getMessage(), e);
@@ -103,13 +97,9 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
     public void undoneItem(int position){
         Task task = tasks.get(position);
         try {
-            if(dataManager.isActiveConnection((Activity) context).get()){
-                task.setDone(false);
-                viewModel.updateTask(task);
-                dataManager.synchronizeFromRoom((Activity) context, false);
-            } else {
-                Toast.makeText(context, "No internet connection.", Toast.LENGTH_SHORT).show();
-            }
+            task.setDone(false);
+            viewModel.updateTask(task);
+            dataManager.synchronizeFromRoom((Activity) context, false);
             notifyDataSetChanged();
         } catch (ExecutionException | InterruptedException e) {
             Log.e(TaskAdapter.class.getName(), e.getMessage(), e);

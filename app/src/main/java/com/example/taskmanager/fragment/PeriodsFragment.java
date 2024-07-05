@@ -98,11 +98,11 @@ public class PeriodsFragment extends Fragment implements AppFragment {
         String[] itemsUntil = new String[] {  get(R.string._3_days), get(R.string._1_week), get(R.string._2_weeks), get(R.string._1_month), get(R.string._3_months), get(R.string._6_months)};
         ArrayAdapter<String> adapterUntil = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_dropdown_item_1line, itemsUntil);
         dropdownUntil.setAdapter(adapterUntil);
-        dropdownUntil.setText(dropdownUntil.getAdapter().getItem(0).toString(), false);
+        dropdownUntil.setText(get(R.string._3_days), false);
         String[] itemsOrder = new String[] { get(R.string.date_order), get(R.string.priority_order)};
         ArrayAdapter<String> adapterOrder = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_dropdown_item_1line, itemsOrder);
         dropdownOrder.setAdapter(adapterOrder);
-        dropdownOrder.setText(dropdownOrder.getAdapter().getItem(0).toString(), false);
+        dropdownOrder.setText(get(R.string.date_order), false);
     }
 
     private AdapterView.OnItemClickListener dropdownUntilAction() {

@@ -5,7 +5,6 @@ import android.util.Log;
 
 import com.example.taskmanager.BuildConfig;
 import com.example.taskmanager.R;
-import com.example.taskmanager.receiver.NotificationReceiver;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -14,6 +13,7 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GitHub {
     private static final String REPO_URL = BuildConfig.REPO_URL;
@@ -35,16 +35,16 @@ public class GitHub {
     }
 
     Git getGit() {
-        Git git = null;
+        AtomicReference<Git> git = new AtomicReference<>();
         try {
             File localPath = File.createTempFile("GitRepository", "");
             if (!localPath.delete())
                 throw new IOException("Could not delete temporary file " + localPath);
-            git = cloneCommand.setDirectory(localPath).call();
+            git.set(cloneCommand.setDirectory(localPath).call());
         } catch (IOException | GitAPIException e) {
             Log.e(GitHub.class.getName(), e.getMessage(), e);
         }
-        return git;
+        return git.get();
     }
 
     public UsernamePasswordCredentialsProvider getCredentials(){

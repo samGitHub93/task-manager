@@ -9,16 +9,21 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
-import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
+import com.example.taskmanager.worker.UpdateWorker;
+import com.example.taskmanager.worker.WorkObserver;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 public class ModifyTaskActivity extends ProcessTaskActivity {
     private Task retrievedTask;
@@ -85,9 +90,7 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
         return view -> {
             Task task = createTask();
             try {
-                if(!getDataManager().isActiveConnection(ModifyTaskActivity.this).get()) {
-                    Toast.makeText(getApplication().getApplicationContext(), "No internet connection.", Toast.LENGTH_LONG).show();
-                }else if(!areDateFilled()){
+                if(!areDateFilled()){
                     Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
                 }else if(!areRecurringCorrectlyFilled()){
                     Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
@@ -101,6 +104,7 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                     }
                     getTaskViewModel().updateTask(task);
                     getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
+                    triggerUpdateWorker();
                 }
             } catch (ExecutionException | InterruptedException e) {
                 Log.e(ModifyTaskActivity.class.getName(), e.getMessage(), e);
@@ -117,12 +121,9 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
 
     private void deleteTask() {
         try {
-            if(!getDataManager().isActiveConnection(ModifyTaskActivity.this).get()) {
-                Toast.makeText(getApplication().getApplicationContext(), "No internet connection.", Toast.LENGTH_SHORT).show();
-            }else {
-                getTaskViewModel().deleteTask(retrievedTask);
-                getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
-            }
+            getTaskViewModel().deleteTask(retrievedTask);
+            getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
+            triggerUpdateWorker();
         } catch (ExecutionException | InterruptedException e) {
             Log.e(ModifyTaskActivity.class.getName(), e.getMessage(), e);
         }
@@ -161,5 +162,12 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
         }else{
             return true;
         }
+    }
+
+    public void triggerUpdateWorker(){
+        WorkManager.getInstance(this).cancelAllWork();
+        WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        WorkManager.getInstance(this).enqueue(workRequest);
+        WorkObserver.getInstance(this).observe(workRequest.getId());
     }
 }

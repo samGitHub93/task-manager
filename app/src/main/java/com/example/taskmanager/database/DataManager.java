@@ -3,10 +3,13 @@ package com.example.taskmanager.database;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.taskmanager.ProcessTaskAction;
 import com.example.taskmanager.R;
+import com.example.taskmanager.TaskActivity;
 import com.example.taskmanager.exception.PullException;
 import com.example.taskmanager.exception.PushException;
 import com.example.taskmanager.model.Task;
@@ -27,7 +30,6 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class DataManager {
     private AppDatabase database;
@@ -71,34 +73,27 @@ public class DataManager {
         return instance;
     }
 
-    public Future<Boolean> isActiveConnection(Activity activity) throws ExecutionException, InterruptedException {
-        ProcessTaskAction processAction = (ProcessTaskAction) activity;
-        return executor.submit(() -> {
-            try {
-                activity.runOnUiThread(() -> enableProgressBar(processAction));
-                String command = "ping -c 1 google.com";
-                boolean result = Runtime.getRuntime().exec(command).waitFor() == 0;
-                activity.runOnUiThread(() -> disableProgressBar(processAction));
-                return result;
-            } catch (Exception e) {
-                activity.runOnUiThread(() -> disableProgressBar(processAction));
-                Log.e(DataManager.class.getName(), e.getMessage(), e);
-                return false;
-            }
-        });
-    }
 
     public void synchronizeFromRoom(Activity activity, Boolean autoClose) throws ExecutionException, InterruptedException {
         ProcessTaskAction processAction = (ProcessTaskAction) activity;
         executor.submit(() -> {
             try {
                 activity.runOnUiThread(() -> enableProgressBar(processAction));
-                List<Task> tasks = database.taskDao().getAll();
-                pushToRemote(tasks);
-                activity.runOnUiThread(() -> disableProgressBar(processAction));
-                if (autoClose)
-                    activity.finish();
-                return true;
+                if(isActiveConnection()) {
+                    List<Task> tasks = database.taskDao().getAll();
+                    pushToRemote(tasks);
+                    activity.runOnUiThread(() -> disableProgressBar(processAction));
+                    if(activity instanceof TaskActivity)
+                        activity.runOnUiThread(() -> updateUI((TaskActivity) activity));
+                    if (autoClose)
+                        activity.finish();
+                    return true;
+                }else {
+                    manageLooper();
+                    Toast.makeText(activity, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
+                    activity.runOnUiThread(() -> disableProgressBar(processAction));
+                    return false;
+                }
             } catch (Exception e) {
                 activity.runOnUiThread(() -> disableProgressBar(processAction));
                 Log.e(DataManager.class.getName(), e.getMessage(), e);
@@ -112,10 +107,19 @@ public class DataManager {
         executor.submit(() -> {
             try {
                 activity.runOnUiThread(() -> enableProgressBar(processAction));
-                List<Task> tasks = pullFromRemote();
-                saveToRoom(tasks);
-                activity.runOnUiThread(() -> disableProgressBar(processAction));
-                return true;
+                if(isActiveConnection()) {
+                    List<Task> tasks = pullFromRemote();
+                    saveToRoom(tasks);
+                    activity.runOnUiThread(() -> disableProgressBar(processAction));
+                    if(activity instanceof TaskActivity)
+                        activity.runOnUiThread(() -> updateUI((TaskActivity) activity));
+                    return true;
+                }else{
+                    manageLooper();
+                    Toast.makeText(activity, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
+                    activity.runOnUiThread(() -> disableProgressBar(processAction));
+                    return false;
+                }
             } catch (Exception e) {
                 activity.runOnUiThread(() -> disableProgressBar(processAction));
                 Log.e(DataManager.class.getName(), e.getMessage(), e);
@@ -127,12 +131,28 @@ public class DataManager {
     public List<Task> synchronizeFromWeb() throws ExecutionException, InterruptedException {
         return executor.submit(() -> {
             try {
-                return pullFromRemote();
+                if(isActiveConnection()) {
+                    return pullFromRemote();
+                }else{
+                    manageLooper();
+                    Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
+                    return new ArrayList<Task>();
+                }
             } catch (Exception e) {
                 Log.e(DataManager.class.getName(), e.getMessage(), e);
                 return new ArrayList<Task>();
             }
         }).get();
+    }
+
+    private Boolean isActiveConnection() {
+            try {
+                String command = "ping -c 1 google.com";
+                return Runtime.getRuntime().exec(command).waitFor() == 0;
+            } catch (Exception e) {
+                Log.e(DataManager.class.getName(), e.getMessage(), e);
+                return false;
+            }
     }
 
     private void pushToRemote(List<Task> tasks) throws PushException {
@@ -234,7 +254,17 @@ public class DataManager {
         processTaskAction.enableTouch();
     }
 
+    private void updateUI(TaskActivity taskActivity){
+        taskActivity.updateUI();
+    }
+
     public AppDatabase getDatabase(){
         return database;
+    }
+
+    private void manageLooper(){
+        if(Looper.myLooper() == null){
+            Looper.prepare();
+        }
     }
 }

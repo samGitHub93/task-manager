@@ -2,11 +2,16 @@ package com.example.taskmanager.notification;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 
 import androidx.core.app.NotificationCompat;
 
+import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
+import com.example.taskmanager.receiver.BootReceiver;
+import com.example.taskmanager.receiver.NotificationReceiver;
 
 public class NotificationTaskCreator {
 
@@ -39,11 +44,15 @@ public class NotificationTaskCreator {
     }
 
     public Notification create(){
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         return new NotificationCompat.Builder(context, notificationChannel.getId())
                 .setSmallIcon(R.drawable.circle_checked)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
                 .setAutoCancel(true)
                 .build();
     }

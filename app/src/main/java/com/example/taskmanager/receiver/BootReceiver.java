@@ -21,7 +21,7 @@ public class BootReceiver extends BroadcastReceiver {
         if (Objects.equals(intent.getAction(), "android.intent.action.BOOT_COMPLETED")) {
             WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
             WorkManager.getInstance(context).enqueue(workRequest);
-            new WorkObserver().observe(context, workRequest.getId());
+            WorkObserver.getInstance(context).observe(workRequest.getId());
         }
     }
 }

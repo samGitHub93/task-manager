@@ -9,7 +9,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
@@ -26,7 +25,6 @@ import com.example.taskmanager.fragment.AppFragment;
 import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
-import com.example.taskmanager.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_model.TaskViewModel;
 import com.example.taskmanager.worker.UpdateWorker;
@@ -64,14 +62,13 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
         progressBar = findViewById(R.id.progressBar);
         database = AppDatabase.getDatabase(this);
         dataManager = DataManager.getInstance(getApplication());
-        updateFromWeb();
         fragmentManager = getSupportFragmentManager();
+        updateFromWeb();
         initFragments();
         initNavigationButton();
         initFloatingButton();
         initCalendar();
         setCurrentFragment(periodsFragment);
-        WorkManager.getInstance(this).cancelAllWork();
         triggerUpdateWorker();
     }
 
@@ -145,12 +142,7 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
 
     private void updateFromWeb(){
         try {
-            if(dataManager.isActiveConnection(MainActivity.this).get()){
                 dataManager.synchronizeFromWeb(MainActivity.this);
-                if (currentFragment != null)
-                    currentFragment.updateUI();
-            }else
-                Toast.makeText(this, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
         } catch (ExecutionException | InterruptedException e) {
             Log.e(MainActivity.class.getName(), e.getMessage(), e);
         }
@@ -210,10 +202,11 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
         updateUI();
     }
 
-    private void triggerUpdateWorker(){
+    public void triggerUpdateWorker(){
+        WorkManager.getInstance(this).cancelAllWork();
         WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
         WorkManager.getInstance(this).enqueue(workRequest);
-        new WorkObserver().observe(this, workRequest.getId());
+        WorkObserver.getInstance(this).observe(workRequest.getId());
     }
 
     @Override
