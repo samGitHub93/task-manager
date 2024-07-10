@@ -1,6 +1,8 @@
 package com.example.taskmanager.adapter;
 
-public interface Adapter<T> {
+import com.example.taskmanager.UiProcessAnimations;
+
+public interface Adapter<T> extends UiProcessAnimations {
     void doneItem(int position);
     void undoneItem(int position);
     T getTask(int position);

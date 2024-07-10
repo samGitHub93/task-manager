@@ -42,10 +42,17 @@
             android:label="Modify/Delete task">
         </activity>
         <activity
-            android:name=".LateTaskActivity"
+            android:name=".LateTasksActivity"
             android:exported="true"
             android:label="Late tasks">
         </activity>
+        <service
+            android:name=".foreground_service.ForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="true"
+            android:permission="android.permission.POST_NOTIFICATIONS"
+            android:enabled="true">
+        </service>
         <receiver
             android:name=".receiver.NotificationReceiver"
             android:exported="true"

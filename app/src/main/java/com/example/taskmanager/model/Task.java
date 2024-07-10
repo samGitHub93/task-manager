@@ -155,4 +155,10 @@ public class Task {
     public void setNotify(String notify) {
         this.notify = notify;
     }
+
+    public Boolean isEqual(Task task){
+        return this.title.equals(task.getTitle()) &&
+                this.text.equals(task.getText()) &&
+                this.date.equals(task.getDate());
+    }
 }

@@ -2,8 +2,6 @@ package com.example.taskmanager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.ProgressBar;
 
 import androidx.annotation.Nullable;
@@ -21,15 +19,12 @@ import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.List;
-import java.util.Objects;
 
-public class LateTaskActivity extends AppCompatActivity implements TaskActivity {
+public class LateTasksActivity extends AppCompatActivity {
 
     private TaskViewModel viewModel;
     private Observer<List<Task>> currentObserver;
-    private List<Task> initialTasks;
-    public ProgressBar progressBar;
-
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -39,8 +34,7 @@ public class LateTaskActivity extends AppCompatActivity implements TaskActivity 
         viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        initialTasks = viewModel.getGetLateTasks().getValue();
-        updateUI();
+        updateList();
     }
 
     @Override
@@ -52,11 +46,14 @@ public class LateTaskActivity extends AppCompatActivity implements TaskActivity 
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void updateUI(){
+    public void updateList(){
         if(currentObserver != null) removeObserver(currentObserver);
         currentObserver = getNewObserver();
         viewModel.getGetLateTasks().observe(this, currentObserver);
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
     }
 
     private void removeObserver(Observer<List<Task>> observer){
@@ -77,35 +74,8 @@ public class LateTaskActivity extends AppCompatActivity implements TaskActivity 
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if(Objects.requireNonNull(viewModel.getGetLateTasks().getValue()).size() != initialTasks.size())
-            MainActivity.currentFragment.setListModified();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
-        updateUI();
-    }
-
-    @Override
-    public void enableProgressBar() {
-        progressBar.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void disableProgressBar() {
-        progressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void disableTouch() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-    @Override
-    public void enableTouch() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        updateList();
     }
 }

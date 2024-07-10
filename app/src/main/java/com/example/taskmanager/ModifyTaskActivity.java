@@ -1,9 +1,9 @@
 package com.example.taskmanager;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Toast;
 
@@ -22,7 +22,7 @@ import com.example.taskmanager.worker.WorkObserver;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 public class ModifyTaskActivity extends ProcessTaskActivity {
@@ -89,25 +89,20 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
     private View.OnClickListener modifyButtonAction(){
         return view -> {
             Task task = createTask();
-            try {
-                if(!areDateFilled()){
-                    Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
-                }else if(!areRecurringCorrectlyFilled()){
-                    Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
-                }else if(!isValidNotificationDate(task)){
-                    Toast.makeText(this, "Please, check notification date!", Toast.LENGTH_LONG).show();
-                }else {
-                    if(!task.getNotify().trim().isEmpty()){
-                        Notifier notifier = new Notifier();
-                        notifier.cancelAlarm(ModifyTaskActivity.this, task);
-                        notifier.createAlarm(ModifyTaskActivity.this, task);
-                    }
-                    getTaskViewModel().updateTask(task);
-                    getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
-                    triggerUpdateWorker();
+            if(!areDateFilled()){
+                Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
+            }else if(!areRecurringCorrectlyFilled()){
+                Toast.makeText(this, "Fill the fields!", Toast.LENGTH_LONG).show();
+            }else if(!isValidNotificationDate(task)){
+                Toast.makeText(this, "Please, check notification date!", Toast.LENGTH_LONG).show();
+            }else {
+                if(!task.getNotify().trim().isEmpty()){
+                    Notifier notifier = new Notifier();
+                    notifier.cancelAlarm(ModifyTaskActivity.this, task);
+                    notifier.createAlarm(ModifyTaskActivity.this, task);
                 }
-            } catch (ExecutionException | InterruptedException e) {
-                Log.e(ModifyTaskActivity.class.getName(), e.getMessage(), e);
+                update(task);
+                finish();
             }
         };
     }
@@ -120,19 +115,14 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
     }
 
     private void deleteTask() {
-        try {
-            getTaskViewModel().deleteTask(retrievedTask);
-            getDataManager().synchronizeFromRoom(ModifyTaskActivity.this, true);
-            triggerUpdateWorker();
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e(ModifyTaskActivity.class.getName(), e.getMessage(), e);
-        }
+        delete(retrievedTask);
+        finish();
     }
 
     private boolean isValidNotificationDate(Task task){
         if(
-                (DateUtil.fromStringToMillis(task.getNotify()) == 0 && !task.getNotify().trim().isEmpty()) ||
-                        (!task.getNotify().trim().isEmpty() && DateUtil.fromStringToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
+                (DateUtil.fromStringDateTimeToMillis(task.getNotify()) == 0 && !task.getNotify().trim().isEmpty()) ||
+                        (!task.getNotify().trim().isEmpty() && DateUtil.fromStringDateTimeToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
                         (Objects.requireNonNull(getTaskNotifyDate().getText()).toString().equals(EMPTY_STRING) && !Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING)) ||
                         (!getTaskNotifyDate().getText().toString().equals(EMPTY_STRING)&& Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING))){
             getTaskNotifyDate().setBackgroundColor(ContextCompat.getColor(this, R.color.red_lite));
@@ -169,5 +159,35 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
         WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
         WorkManager.getInstance(this).enqueue(workRequest);
         WorkObserver.getInstance(this).observe(workRequest.getId());
+    }
+
+    private void update(Task taskToUpdate){
+        Executors.newSingleThreadExecutor().submit(() -> {
+            runOnUiThread(() -> {
+                enableProgressBar();
+                getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+            getTaskViewModel().updateTask(taskToUpdate);
+            triggerUpdateWorker();
+            runOnUiThread(() -> {
+                disableProgressBar();
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+        });
+    }
+
+    private void delete(Task taskToDelete){
+        Executors.newSingleThreadExecutor().submit(() -> {
+            runOnUiThread(() -> {
+                enableProgressBar();
+                getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+            getTaskViewModel().deleteTask(taskToDelete);
+            triggerUpdateWorker();
+            runOnUiThread(() -> {
+                disableProgressBar();
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+        });
     }
 }

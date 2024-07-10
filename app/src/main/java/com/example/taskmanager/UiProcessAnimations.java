@@ -1,8 +1,6 @@
 package com.example.taskmanager;
 
-public interface ProcessTaskAction {
+public interface UiProcessAnimations {
     void enableProgressBar();
     void disableProgressBar();
-    void disableTouch();
-    void enableTouch();
 }

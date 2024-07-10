@@ -20,6 +20,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
+import com.example.taskmanager.UiActions;
 import com.example.taskmanager.adapter.TaskAdapter;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskSwiper;
@@ -27,14 +28,14 @@ import com.example.taskmanager.util.TaskSorter;
 import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.List;
+import java.util.Objects;
 
-public class SearchFragment extends Fragment implements AppFragment {
+public class SearchFragment extends Fragment implements UiActions {
 
     private TaskViewModel viewModel;
     private Observer<List<Task>> currentObserver;
     private static final String INITIAL_VALUE = "######";
     private String query = INITIAL_VALUE;
-    private static boolean isListModified = false;
 
     @Nullable
     @Override
@@ -50,7 +51,6 @@ public class SearchFragment extends Fragment implements AppFragment {
         SearchView searchView = requireActivity().findViewById(R.id.search_view);
         searchView.setOnClickListener(clickAction());
         searchView.setOnQueryTextListener(searchAction());
-        updateUI();
     }
 
     public void updateUI(){
@@ -58,6 +58,17 @@ public class SearchFragment extends Fragment implements AppFragment {
         if(query.isEmpty()) query = INITIAL_VALUE;
         currentObserver = getNewObserver();
         viewModel.getTasksByTitleOrTextOrDate(query).observe(getViewLifecycleOwner(), currentObserver);
+    }
+
+    @Override
+    public void updateMenu() {
+        if (((MainActivity)requireActivity()).getMenu() != null) {
+            ((MainActivity)requireActivity()).setMenuItem(((MainActivity)requireActivity()).getMenu().getItem(0));
+            if (areThereLateTasks()) {
+                ((MainActivity)requireActivity()).getMenuItem().setIcon(R.drawable.ic_baseline_warning_red_24);
+            } else
+                ((MainActivity)requireActivity()).getMenuItem().setIcon(R.drawable.ic_baseline_warning_24);
+        }
     }
 
     private void removeObserver(String typing, Observer<List<Task>> observer){
@@ -112,46 +123,27 @@ public class SearchFragment extends Fragment implements AppFragment {
     }
 
     @Override
-    public boolean isListModified(){
-        return isListModified;
-    }
-
-    @Override
-    public void setListModified(){
-        isListModified = true;
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        System.out.println("ATTACHED SEARCH");
-        isListModified = false;
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED SEARCH");
-        ((MainActivity) requireActivity()).updateMenu();
+        updateMenu();
+        updateUI();
     }
 
     @Override
     public void enableProgressBar() {
-        ((MainActivity) requireActivity()).enableProgressBar();
-    }
-
-    @Override
-    public void disableProgressBar() {
-        ((MainActivity) requireActivity()).disableProgressBar();
-    }
-
-    @Override
-    public void disableTouch() {
+        ((MainActivity) requireActivity()).getProgressBar().setVisibility(View.VISIBLE);
         requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
     @Override
-    public void enableTouch() {
+    public void disableProgressBar() {
+        ((MainActivity) requireActivity()).getProgressBar().setVisibility(View.GONE);
         requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    public boolean areThereLateTasks(){
+        TaskViewModel viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        return !Objects.requireNonNull(viewModel.getGetLateTasks().getValue()).isEmpty();
     }
 }

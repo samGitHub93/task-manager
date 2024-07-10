@@ -4,7 +4,7 @@ import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.taskmanager.database.AppDatabase;
+import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.database.TaskDao;
 import com.example.taskmanager.enumerator.PeriodType;
 import com.example.taskmanager.model.Task;
@@ -14,13 +14,15 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class TaskRepository {
-
+    private final DataManager dataManager;
     private final TaskDao taskDao;
 
     public TaskRepository(Application application) {
-        taskDao = AppDatabase.getDatabase(application.getApplicationContext()).taskDao();
+        dataManager = DataManager.getInstance(application);
+        taskDao = dataManager.getDatabase().taskDao();
     }
 
     public MutableLiveData<Task> getTaskById(MutableLiveData<Task> mutableLiveData, long id){
@@ -75,15 +77,30 @@ public class TaskRepository {
     }
 
     public void insertTask(Task task){
-        taskDao.insert(task);
+        try {
+            taskDao.insert(task);
+            dataManager.synchronizeFromRoom();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void deleteTask(Task task){
-        taskDao.delete(task);
+        try {
+            taskDao.delete(task);
+            dataManager.synchronizeFromRoom();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void updateTask(Task task){
-        taskDao.update(task);
+        try {
+            taskDao.update(task);
+            dataManager.synchronizeFromRoom();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public MutableLiveData<List<Task>> getAll(MutableLiveData<List<Task>> mutableLiveData){

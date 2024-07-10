@@ -1,5 +1,6 @@
 package com.example.taskmanager.util;
 
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.example.taskmanager.receiver.NotificationReceiver;
@@ -93,6 +94,36 @@ public class DateUtil {
         return calendar;
     }
 
+    public static Date getDateTimePlusDays(Date date, @SuppressWarnings("SameParameterValue") int i){
+        Calendar c = getCalendar(date);
+        c.add(Calendar.DATE, i);
+        return c.getTime();
+    }
+
+    public static Date getDateTimePlusWeeks(Date date, int i){
+        Calendar c = getCalendar(date);
+        c.add(Calendar.WEEK_OF_YEAR, i);
+        return c.getTime();
+    }
+
+    public static Date getDateTimePlusMonths(Date date, int i){
+        Calendar c = getCalendar(date);
+        c.add(Calendar.MONTH, i);
+        return c.getTime();
+    }
+
+    public static Date getDateTimePlusYears(Date date, @SuppressWarnings("SameParameterValue") int i){
+        Calendar c = getCalendar(date);
+        c.add(Calendar.YEAR, i);
+        return c.getTime();
+    }
+
+    public static Calendar getCalendar(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        return calendar;
+    }
+
     public static long nowInMillis(){
         return Instant.now().atZone(ZoneId.of("Europe/Rome")).toEpochSecond()*1000;
     }
@@ -102,7 +133,7 @@ public class DateUtil {
         return ZonedDateTime.ofInstant(instant, ZoneId.of("Europe/Rome"));
     }
 
-    public static long fromStringToMillis(String dateString){
+    public static long fromStringDateTimeToMillis(String dateString){
         try {
             SimpleDateFormat dateFormat = getDateTimeFormatter();
             return Objects.requireNonNull(dateFormat.parse(dateString)).getTime();
@@ -110,5 +141,35 @@ public class DateUtil {
             Log.e(DateUtil.class.getName(), e.getMessage(), e);
             return 0;
         }
+    }
+
+    public static long fromStringDateToMillis(String dateString){
+        try {
+            SimpleDateFormat dateFormat = getFormatter();
+            return Objects.requireNonNull(dateFormat.parse(dateString)).getTime();
+        }catch(ParseException | NullPointerException | AssertionError e){
+            Log.e(DateUtil.class.getName(), e.getMessage(), e);
+            return 0;
+        }
+    }
+
+    public static Date getDateTimeFromString(String stringDate) {
+        try {
+            return getDateTimeFormatter().parse(stringDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Date getDateFromString(String stringDate){
+        try {
+            return getFormatter().parse(stringDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Date getTodayWithoutTime(){
+        return DateUtil.getCalendarWithoutTime(new Date()).getTime();
     }
 }

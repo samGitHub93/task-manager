@@ -19,7 +19,7 @@ import com.example.taskmanager.view_item.DropDown;
 import com.example.taskmanager.view_item.TimeTextView;
 import com.example.taskmanager.view_model.TaskViewModel;
 
-public abstract class ProcessTaskActivity extends AppCompatActivity implements ProcessTaskAction {
+public abstract class ProcessTaskActivity extends AppCompatActivity implements UiProcessAnimations {
 
     private DataManager dataManager;
     private TaskViewModel taskViewModel;
@@ -155,20 +155,12 @@ public abstract class ProcessTaskActivity extends AppCompatActivity implements P
     @Override
     public void enableProgressBar() {
         progressBar.setVisibility(View.VISIBLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
     @Override
     public void disableProgressBar() {
         progressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void disableTouch() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-    @Override
-    public void enableTouch() {
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 }

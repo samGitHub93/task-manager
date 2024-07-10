@@ -20,7 +20,7 @@ public class Notifier {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = prepareIntent();
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, Integer.parseInt(String.valueOf(task.getId())), intent, PendingIntent.FLAG_IMMUTABLE);
-        long millis = DateUtil.fromStringToMillis(task.getNotify());
+        long millis = DateUtil.fromStringDateTimeToMillis(task.getNotify());
         alarmManager.setExact(AlarmManager.RTC_WAKEUP, millis, alarmIntent);
     }
 

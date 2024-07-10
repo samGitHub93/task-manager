@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
+import com.example.taskmanager.UiActions;
 import com.example.taskmanager.adapter.TaskAdapter;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.swiper.TaskSwiper;
@@ -29,14 +30,14 @@ import com.example.taskmanager.view_model.TaskViewModel;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
-public class DayFragment extends Fragment implements AppFragment {
+public class DayFragment extends Fragment implements UiActions {
 
     private TaskViewModel viewModel;
     private Observer<List<Task>> currentObserver;
     private TextView textDate;
     private Date date;
-    private static boolean isListModified = false;
 
     @Nullable
     @Override
@@ -50,7 +51,6 @@ public class DayFragment extends Fragment implements AppFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         textDate = requireActivity().findViewById(R.id.text_date);
-        updateUI();
     }
 
     @Override
@@ -60,6 +60,17 @@ public class DayFragment extends Fragment implements AppFragment {
         textDate.setText(StringUtil.capFirstCharacter(DateUtil.getFormatter().format(date)));
         currentObserver = getNewObserver();
         viewModel.getTasksByDate(date).observe(getViewLifecycleOwner(), currentObserver);
+    }
+
+    @Override
+    public void updateMenu() {
+            if (((MainActivity)requireActivity()).getMenu() != null) {
+                ((MainActivity)requireActivity()).setMenuItem(((MainActivity)requireActivity()).getMenu().getItem(0));
+                if (areThereLateTasks()) {
+                    ((MainActivity)requireActivity()).getMenuItem().setIcon(R.drawable.ic_baseline_warning_red_24);
+                } else
+                    ((MainActivity)requireActivity()).getMenuItem().setIcon(R.drawable.ic_baseline_warning_24);
+            }
     }
 
     public void setDate(Date date){
@@ -84,47 +95,27 @@ public class DayFragment extends Fragment implements AppFragment {
     }
 
     @Override
-    public boolean isListModified(){
-        return isListModified;
-    }
-
-    @Override
-    public void setListModified(){
-        isListModified = true;
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        System.out.println("ATTACHED DAY");
-        isListModified = false;
-    }
-
-    @Override
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED DAY");
-        ((MainActivity) requireActivity()).updateMenu();
         updateUI();
-    }
-
-    @Override
-    public void disableTouch() {
-        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-    @Override
-    public void enableTouch() {
-        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        updateMenu();
     }
 
     @Override
     public void enableProgressBar() {
-        ((MainActivity) requireActivity()).enableProgressBar();
+        ((MainActivity) requireActivity()).getProgressBar().setVisibility(View.VISIBLE);
+        requireActivity().getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
     }
 
     @Override
     public void disableProgressBar() {
-        ((MainActivity) requireActivity()).disableProgressBar();
+        ((MainActivity) requireActivity()).getProgressBar().setVisibility(View.GONE);
+        requireActivity().getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+    }
+
+    public boolean areThereLateTasks(){
+        TaskViewModel viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        return !Objects.requireNonNull(viewModel.getGetLateTasks().getValue()).isEmpty();
     }
 }

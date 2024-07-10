@@ -1,15 +1,12 @@
 package com.example.taskmanager.database;
 
-import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.example.taskmanager.ProcessTaskAction;
 import com.example.taskmanager.R;
-import com.example.taskmanager.TaskActivity;
 import com.example.taskmanager.exception.PullException;
 import com.example.taskmanager.exception.PushException;
 import com.example.taskmanager.model.Task;
@@ -26,6 +23,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -73,62 +71,35 @@ public class DataManager {
         return instance;
     }
 
-
-    public void synchronizeFromRoom(Activity activity, Boolean autoClose) throws ExecutionException, InterruptedException {
-        ProcessTaskAction processAction = (ProcessTaskAction) activity;
-        executor.submit(() -> {
-            try {
-                activity.runOnUiThread(() -> enableProgressBar(processAction));
-                if(isActiveConnection()) {
-                    List<Task> tasks = database.taskDao().getAll();
-                    pushToRemote(tasks);
-                    activity.runOnUiThread(() -> disableProgressBar(processAction));
-                    if(activity instanceof TaskActivity)
-                        activity.runOnUiThread(() -> updateUI((TaskActivity) activity));
-                    if (autoClose)
-                        activity.finish();
-                    return true;
-                }else {
-                    manageLooper();
-                    Toast.makeText(activity, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
-                    activity.runOnUiThread(() -> disableProgressBar(processAction));
-                    return false;
-                }
-            } catch (Exception e) {
-                activity.runOnUiThread(() -> disableProgressBar(processAction));
-                Log.e(DataManager.class.getName(), e.getMessage(), e);
-                return false;
+    public void synchronizeFromRoom() throws ExecutionException, InterruptedException {
+        try {
+            if (isActiveConnection()) {
+                List<Task> tasks = database.taskDao().getAll();
+                pushToRemote(tasks);
+            } else {
+                manageLooper();
+                Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
             }
-        });
+        } catch (Exception e) {
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
+        }
     }
 
-    public void synchronizeFromWeb(Activity activity) throws ExecutionException, InterruptedException {
-        ProcessTaskAction processAction = (ProcessTaskAction) activity;
-        executor.submit(() -> {
-            try {
-                activity.runOnUiThread(() -> enableProgressBar(processAction));
-                if(isActiveConnection()) {
-                    List<Task> tasks = pullFromRemote();
-                    saveToRoom(tasks);
-                    activity.runOnUiThread(() -> disableProgressBar(processAction));
-                    if(activity instanceof TaskActivity)
-                        activity.runOnUiThread(() -> updateUI((TaskActivity) activity));
-                    return true;
-                }else{
-                    manageLooper();
-                    Toast.makeText(activity, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
-                    activity.runOnUiThread(() -> disableProgressBar(processAction));
-                    return false;
-                }
-            } catch (Exception e) {
-                activity.runOnUiThread(() -> disableProgressBar(processAction));
-                Log.e(DataManager.class.getName(), e.getMessage(), e);
-                return false;
+    public void synchronizeFromWeb() throws ExecutionException, InterruptedException {
+        try {
+            if (isActiveConnection()) {
+                List<Task> tasks = pullFromRemote();
+                saveToRoom(tasks);
+            } else {
+                manageLooper();
+                Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
             }
-        });
+        } catch (Exception e) {
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
+        }
     }
 
-    public List<Task> synchronizeFromWeb() throws ExecutionException, InterruptedException {
+    public List<Task> getFromWeb() throws ExecutionException, InterruptedException {
         return executor.submit(() -> {
             try {
                 if(isActiveConnection()) {
@@ -242,20 +213,6 @@ public class DataManager {
     private void saveToRoom(List<Task> tasks) {
         database.taskDao().deleteAll();
         database.taskDao().insertAll(tasks);
-    }
-
-    private void enableProgressBar(ProcessTaskAction processTaskAction) {
-        processTaskAction.enableProgressBar();
-        processTaskAction.disableTouch();
-    }
-
-    private void disableProgressBar(ProcessTaskAction processTaskAction){
-        processTaskAction.disableProgressBar();
-        processTaskAction.enableTouch();
-    }
-
-    private void updateUI(TaskActivity taskActivity){
-        taskActivity.updateUI();
     }
 
     public AppDatabase getDatabase(){

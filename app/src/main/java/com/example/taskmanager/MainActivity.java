@@ -19,9 +19,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
-import com.example.taskmanager.database.AppDatabase;
 import com.example.taskmanager.database.DataManager;
-import com.example.taskmanager.fragment.AppFragment;
 import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
@@ -39,14 +37,14 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.TimeZone;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class MainActivity extends AppCompatActivity implements TaskActivity {
+public class MainActivity extends AppCompatActivity {
 
-    public AppDatabase database;
-    public static AppFragment currentFragment;
-    public static FragmentManager fragmentManager;
-    public ProgressBar progressBar;
+    private static UiActions currentFragment;
+    private static FragmentManager fragmentManager;
+    private ProgressBar progressBar;
     private DataManager dataManager;
     private DayFragment dayFragment;
     private PeriodsFragment periodsFragment;
@@ -60,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progressBar);
-        database = AppDatabase.getDatabase(this);
         dataManager = DataManager.getInstance(getApplication());
         fragmentManager = getSupportFragmentManager();
         updateFromWeb();
@@ -89,13 +86,43 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.calendarButton) showCalendar();
-        else if(id == R.id.refreshButton) updateFromWeb();
-        else if(id == R.id.warningButton) {
-            Intent lateActivity = new Intent(MainActivity.this, LateTaskActivity.class);
+        if (id == R.id.calendarButton) {
+            showCalendar();
+        }else if(id == R.id.refreshButton) {
+            updateFromWeb();
+        }else if(id == R.id.warningButton) {
+            Intent lateActivity = new Intent(MainActivity.this, LateTasksActivity.class);
             startActivity(lateActivity);
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public Menu getMenu() {
+        return menu;
+    }
+
+    public MenuItem getMenuItem() {
+        return menuItem;
+    }
+
+    public void setMenuItem(MenuItem menuItem){
+        this.menuItem = menuItem;
+    }
+
+    public ProgressBar getProgressBar() {
+        return progressBar;
+    }
+
+    private void triggerUpdateWorker(){
+        WorkManager.getInstance(this).cancelAllWork();
+        WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        WorkManager.getInstance(this).enqueue(workRequest);
+        WorkObserver.getInstance(this).observe(workRequest.getId());
+    }
+
+    private boolean areThereLateTasks(){
+        TaskViewModel viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
+        return !Objects.requireNonNull(viewModel.getGetLateTasks().getValue()).isEmpty();
     }
 
     private void initCalendar(){
@@ -141,11 +168,21 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
     }
 
     private void updateFromWeb(){
-        try {
-                dataManager.synchronizeFromWeb(MainActivity.this);
-        } catch (ExecutionException | InterruptedException e) {
-            Log.e(MainActivity.class.getName(), e.getMessage(), e);
-        }
+        Executors.newSingleThreadExecutor().submit(() -> {
+            try {
+                runOnUiThread(() -> {
+                    progressBar.setVisibility(View.VISIBLE);
+                    getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                });
+                dataManager.synchronizeFromWeb();
+                runOnUiThread(() -> {
+                    progressBar.setVisibility(View.GONE);
+                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                });
+            } catch (ExecutionException | InterruptedException e) {
+                Log.e(MainActivity.class.getName(), e.getMessage(), e);
+            }
+        });
     }
 
     private View.OnClickListener buttonAction() {
@@ -177,60 +214,6 @@ public class MainActivity extends AppCompatActivity implements TaskActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.replace(R.id.fragment, fragment);
         transaction.commit();
-        currentFragment = (AppFragment) fragment;
-    }
-
-    public boolean areThereLateTasks(){
-        TaskViewModel viewModel = new ViewModelProvider(this).get(TaskViewModel.class);
-        return !Objects.requireNonNull(viewModel.getGetLateTasks().getValue()).isEmpty();
-    }
-
-    public void updateMenu(){
-        if (menu != null) {
-            menuItem = menu.getItem(0);
-            if (areThereLateTasks()) {
-                menuItem.setIcon(R.drawable.ic_baseline_warning_red_24);
-            } else
-                menuItem.setIcon(R.drawable.ic_baseline_warning_24);
-        }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        updateMenu();
-        updateUI();
-    }
-
-    public void triggerUpdateWorker(){
-        WorkManager.getInstance(this).cancelAllWork();
-        WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueue(workRequest);
-        WorkObserver.getInstance(this).observe(workRequest.getId());
-    }
-
-    @Override
-    public void updateUI(){
-        currentFragment.updateUI();
-    }
-
-    @Override
-    public void enableProgressBar() {
-        progressBar.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void disableProgressBar() {
-        progressBar.setVisibility(View.GONE);
-    }
-
-    @Override
-    public void disableTouch() {
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-    }
-
-    @Override
-    public void enableTouch() {
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        currentFragment = (UiActions) fragment;
     }
 }
