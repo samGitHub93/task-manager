@@ -16,7 +16,6 @@ import com.example.taskmanager.util.StringUtil;
 
 import java.text.ParseException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class UpdateWorker extends Worker {
@@ -30,8 +29,9 @@ public class UpdateWorker extends Worker {
     public Result doWork() {
         try {
             DataManager dataManager = DataManager.getInstance(getApplicationContext());
-            List<Task> allTasks = dataManager.getFromWeb();
+            List<Task> allTasks = dataManager.getAllFromWeb();
             saveRecurringTasks(dataManager, allTasks);
+            deleteOldTasks(dataManager, allTasks);
             boolean filtered = allTasks.removeIf(this::filter);
             if (!allTasks.isEmpty() && filtered) {
                 Notifier notifier = new Notifier();
@@ -49,6 +49,11 @@ public class UpdateWorker extends Worker {
         }
     }
 
+    private void deleteOldTasks(DataManager dataManager, List<Task> tasks){
+        List<Task> filteredTasks = tasks.stream().filter(t -> DateUtil.getDateFromString(t.getDate()).before(DateUtil.getDatePlusYears(DateUtil.getTodayWithoutTime(), -1))).collect(Collectors.toList());
+        dataManager.deleteOldTasks(filteredTasks);
+    }
+
     private boolean filter(Task task){
         return (task.getNotify().trim().isEmpty() ||
                 task.isDone() ||
@@ -58,19 +63,14 @@ public class UpdateWorker extends Worker {
 
     private void saveRecurringTasks(DataManager dataManager, List<Task> tasks) throws ParseException {
         List<Task> recurringTasks = tasks.stream().filter(t -> t.getRecurringType() != RecurringType.NONE).collect(Collectors.toList());
-        try {
-            for (Task task : recurringTasks) {
-                Task newTask = createNewRecurringTask(task);
-                List<Task> taskByDate = recurringTasks.stream().filter((t) -> t.isEqual(newTask)).collect(Collectors.toList());
-                Log.i(UpdateWorker.class.getName(), "ADDING RECURRENT TASK: " + newTask.getTitle() + " | " + newTask.getText());
-                if (taskByDate.isEmpty() && !DateUtil.getDateFromString(task.getDate()).after(DateUtil.getTodayWithoutTime()) && !DateUtil.getDateFromString(newTask.getDate()).before(DateUtil.getTodayWithoutTime())) {
-                    dataManager.getDatabase().taskDao().insert(newTask);
-                    dataManager.synchronizeFromRoom();
-                    Log.i(UpdateWorker.class.getName(), "ADDED TASK: " + newTask.getTitle() + " | " + newTask.getText());
-                }
+        for (Task task : recurringTasks) {
+            Task newTask = createNewRecurringTask(task);
+            List<Task> taskByDate = recurringTasks.stream().filter((t) -> t.isEqual(newTask)).collect(Collectors.toList());
+            Log.i(UpdateWorker.class.getName(), "ADDING RECURRENT TASK: " + newTask.getTitle() + " | " + newTask.getText());
+            if (taskByDate.isEmpty() && !DateUtil.getDateFromString(task.getDate()).after(DateUtil.getTodayWithoutTime()) && !DateUtil.getDateFromString(newTask.getDate()).before(DateUtil.getTodayWithoutTime())) {
+                dataManager.insert(newTask, true);
+                Log.i(UpdateWorker.class.getName(), "ADDED TASK: " + newTask.getTitle() + " | " + newTask.getText());
             }
-        } catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
         }
     }
 

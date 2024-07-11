@@ -12,7 +12,7 @@ import com.example.taskmanager.model.Task;
 import java.util.List;
 
 @Dao
-public interface TaskDao {
+interface TaskDao {
     @Query("SELECT * FROM task")
     List<Task> getAll();
 

@@ -1,4 +1,4 @@
-package com.example.taskmanager;
+package com.example.taskmanager.process_activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -13,7 +13,8 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.taskmanager.database.DataManager;
+import com.example.taskmanager.R;
+import com.example.taskmanager.UiProcessAnimations;
 import com.example.taskmanager.view_item.DateTextView;
 import com.example.taskmanager.view_item.DropDown;
 import com.example.taskmanager.view_item.TimeTextView;
@@ -21,7 +22,6 @@ import com.example.taskmanager.view_model.TaskViewModel;
 
 public abstract class ProcessTaskActivity extends AppCompatActivity implements UiProcessAnimations {
 
-    private DataManager dataManager;
     private TaskViewModel taskViewModel;
     private ProgressBar progressBar;
     public static final String EMPTY_STRING = "";
@@ -38,68 +38,32 @@ public abstract class ProcessTaskActivity extends AppCompatActivity implements U
         return taskTitle;
     }
 
-    public void setTaskTitle(AutoCompleteTextView taskTitle) {
-        this.taskTitle = taskTitle;
-    }
-
     public AutoCompleteTextView getTaskDetails() {
         return taskDetails;
-    }
-
-    public void setTaskDetails(AutoCompleteTextView taskDetails) {
-        this.taskDetails = taskDetails;
     }
 
     public DateTextView getTaskDate() {
         return taskDate;
     }
 
-    public void setTaskDate(DateTextView taskDate) {
-        this.taskDate = taskDate;
-    }
-
     public DropDown getTaskPriority() {
         return taskPriority;
-    }
-
-    public void setTaskPriority(DropDown taskPriority) {
-        this.taskPriority = taskPriority;
     }
 
     public DropDown getTaskRecurring() {
         return taskRecurring;
     }
 
-    public void setTaskRecurring(DropDown taskRecurring) {
-        this.taskRecurring = taskRecurring;
-    }
-
     public DateTextView getTaskRecurringUntil() {
         return taskRecurringUntil;
-    }
-
-    public void setTaskRecurringUntil(DateTextView taskRecurringUntil) {
-        this.taskRecurringUntil = taskRecurringUntil;
     }
 
     public DateTextView getTaskNotifyDate() {
         return taskNotifyDate;
     }
 
-    public void setTaskNotifyDate(DateTextView taskNotifyDate) {
-        this.taskNotifyDate = taskNotifyDate;
-    }
-
     public TimeTextView getTaskNotifyTime() {
         return taskNotifyTime;
-    }
-
-    public void setTaskNotifyTime(TimeTextView taskNotifyTime) {
-        this.taskNotifyTime = taskNotifyTime;
-    }
-
-    public DataManager getDataManager() {
-        return dataManager;
     }
 
     public TaskViewModel getTaskViewModel() {
@@ -118,7 +82,6 @@ public abstract class ProcessTaskActivity extends AppCompatActivity implements U
 
     public void initActivity(){
         progressBar = findViewById(R.id.progressBar);
-        dataManager = DataManager.getInstance(getApplication());
         taskViewModel = new ViewModelProvider(this).get(TaskViewModel.class);
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

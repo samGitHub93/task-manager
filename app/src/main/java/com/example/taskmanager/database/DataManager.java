@@ -23,14 +23,13 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class DataManager {
-    private AppDatabase database;
+    private TaskDao taskDao;
     private Context context;
     private static DataManager instance;
     private GitHub gitHub;
@@ -40,7 +39,7 @@ public class DataManager {
     private DataManager(Application application) {
         try {
             context = application.getApplicationContext();
-            database = AppDatabase.getDatabase(this.context);
+            taskDao = AppDatabase.getDatabase(this.context).taskDao();
             gitHub = GitHub.getInstance(context);
             git = executor.submit(gitHub::getGit).get();
         } catch (ExecutionException | InterruptedException e) {
@@ -51,7 +50,7 @@ public class DataManager {
     private DataManager(Context context){
         try {
             this.context = context;
-            database = AppDatabase.getDatabase(this.context);
+            taskDao = AppDatabase.getDatabase(this.context).taskDao();
             gitHub = GitHub.getInstance(context);
             git = executor.submit(gitHub::getGit).get();
         } catch (ExecutionException | InterruptedException e) {
@@ -71,18 +70,72 @@ public class DataManager {
         return instance;
     }
 
-    public void synchronizeFromRoom() throws ExecutionException, InterruptedException {
+    public void insert(Task task, Boolean sync) {
         try {
-            if (isActiveConnection()) {
-                List<Task> tasks = database.taskDao().getAll();
-                pushToRemote(tasks);
-            } else {
-                manageLooper();
-                Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
+            taskDao.insert(task);
+            if (sync) {
+                synchronizeFromRoom();
             }
-        } catch (Exception e) {
-            Log.e(DataManager.class.getName(), e.getMessage(), e);
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
         }
+    }
+
+    public void delete(Task task, Boolean sync){
+        try {
+            taskDao.delete(task);
+            if (sync) {
+                synchronizeFromRoom();
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void update(Task task, Boolean sync){
+        try {
+            taskDao.update(task);
+            if (sync) {
+                synchronizeFromRoom();
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public List<Task> getAll(Boolean sync){
+        try {
+            if (sync) {
+                synchronizeFromWeb();
+            }
+            return taskDao.getAll();
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
+            return new ArrayList<>();
+        }
+    }
+
+    public void deleteOldTasks(List<Task> tasks){
+        try {
+            for(Task task : tasks){
+                taskDao.delete(task);
+            }
+            synchronizeFromRoom();
+        } catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Task getById(long id){
+        return taskDao.getById(id);
+    }
+
+    public List<Task> getByDate(String date){
+        return taskDao.getByDate(date);
+    }
+
+    public List<Task> getByTitleOrTextOrDate(String typing){
+        return taskDao.getTasksByTitleOrTextOrDate(typing);
     }
 
     public void synchronizeFromWeb() throws ExecutionException, InterruptedException {
@@ -99,7 +152,7 @@ public class DataManager {
         }
     }
 
-    public List<Task> getFromWeb() throws ExecutionException, InterruptedException {
+    public List<Task> getAllFromWeb() throws ExecutionException, InterruptedException {
         return executor.submit(() -> {
             try {
                 if(isActiveConnection()) {
@@ -116,6 +169,20 @@ public class DataManager {
         }).get();
     }
 
+    private void synchronizeFromRoom() throws ExecutionException, InterruptedException {
+        try {
+            if (isActiveConnection()) {
+                List<Task> tasks = taskDao.getAll();
+                pushToRemote(tasks);
+            } else {
+                manageLooper();
+                Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
+            }
+        } catch (Exception e) {
+            Log.e(DataManager.class.getName(), e.getMessage(), e);
+        }
+    }
+
     private Boolean isActiveConnection() {
             try {
                 String command = "ping -c 1 google.com";
@@ -127,20 +194,24 @@ public class DataManager {
     }
 
     private void pushToRemote(List<Task> tasks) throws PushException {
+        PrintWriter writer = null;
         try {
             File theDir = new File(git.getRepository().getDirectory().getParent(), "webapp");
             File myFile = new File(theDir, "csvFile.csv");
             git.add().addFilepattern(".").call();
             git.commit().setMessage("Commit all changes including additions").call();
-            PrintWriter writer = new PrintWriter(myFile);
+            writer = new PrintWriter(myFile);
             writeTasks(writer, tasks);
-            writer.close();
             git.add().addFilepattern("*").call();
             git.commit().setAll(true).setMessage("Commit changes to all files").call();
             git.push().setCredentialsProvider(gitHub.getCredentials()).call();
         } catch (IOException | GitAPIException e) {
             Log.e(DataManager.class.getName(), e.getMessage(), e);
             throw new PushException();
+        }finally {
+            if(writer != null) writer.close();
+            git.close();
+            git.getRepository().close();
         }
     }
 
@@ -159,24 +230,31 @@ public class DataManager {
     private List<Task> downloadTasks() throws IOException {
         List<Task> tasks;
         File gitFolder = null;
+        FileReader fileReader = null;
+        BufferedReader reader = null;
         try {
             git = gitHub.getGit();
             tasks = new ArrayList<>();
             String path = git.getRepository().getDirectory().getPath().replace("/.git", "");
             gitFolder = new File(path + context.getString(R.string.file_path));
-            BufferedReader reader = new BufferedReader(new FileReader(gitFolder));
+            fileReader = new FileReader(gitFolder);
+            reader = new BufferedReader(fileReader);
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] lineArray = line.split("\\|\\|\\|");
                 Task task = readTask(lineArray);
                 tasks.add(task);
             }
-            reader.close();
             FileUtils.delete(gitFolder);
         }catch (IOException e){
             Log.e(DataManager.class.getName(), e.getMessage(), e);
             FileUtils.delete(gitFolder);
             throw new IOException();
+        }finally {
+            if(reader != null) reader.close();
+            if(fileReader != null) fileReader.close();
+            git.close();
+            git.getRepository().close();
         }
         return tasks;
     }
@@ -211,12 +289,8 @@ public class DataManager {
     }
 
     private void saveToRoom(List<Task> tasks) {
-        database.taskDao().deleteAll();
-        database.taskDao().insertAll(tasks);
-    }
-
-    public AppDatabase getDatabase(){
-        return database;
+        taskDao.deleteAll();
+        taskDao.insertAll(tasks);
     }
 
     private void manageLooper(){

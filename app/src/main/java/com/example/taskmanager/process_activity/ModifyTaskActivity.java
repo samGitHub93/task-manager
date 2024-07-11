@@ -1,4 +1,4 @@
-package com.example.taskmanager;
+package com.example.taskmanager.process_activity;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -13,6 +13,7 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
+import com.example.taskmanager.R;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
 import com.example.taskmanager.util.DateUtil;

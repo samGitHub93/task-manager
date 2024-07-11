@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmanager.LateTasksActivity;
 import com.example.taskmanager.MainActivity;
-import com.example.taskmanager.ModifyTaskActivity;
+import com.example.taskmanager.process_activity.ModifyTaskActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;

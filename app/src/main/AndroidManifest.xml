@@ -32,12 +32,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".AddTaskActivity"
+            android:name=".process_activity.AddTaskActivity"
             android:exported="true"
             android:label="New task">
         </activity>
         <activity
-            android:name=".ModifyTaskActivity"
+            android:name=".process_activity.ModifyTaskActivity"
             android:exported="true"
             android:label="Modify/Delete task">
         </activity>

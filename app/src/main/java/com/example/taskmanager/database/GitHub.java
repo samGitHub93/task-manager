@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class GitHub {
+class GitHub {
     private static final String REPO_URL = BuildConfig.REPO_URL;
     private static GitHub instance;
     private final UsernamePasswordCredentialsProvider credentials;
@@ -47,7 +47,7 @@ public class GitHub {
         return git.get();
     }
 
-    public UsernamePasswordCredentialsProvider getCredentials(){
+    UsernamePasswordCredentialsProvider getCredentials(){
         return credentials;
     }
 }

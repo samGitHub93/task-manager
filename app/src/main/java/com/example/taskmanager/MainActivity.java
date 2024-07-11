@@ -23,6 +23,7 @@ import com.example.taskmanager.database.DataManager;
 import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
+import com.example.taskmanager.process_activity.AddTaskActivity;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_model.TaskViewModel;
 import com.example.taskmanager.worker.UpdateWorker;
