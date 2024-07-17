@@ -3,7 +3,6 @@ package com.example.taskmanager;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,12 +13,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
-import com.example.taskmanager.database.DataManager;
+import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.fragment.DayFragment;
 import com.example.taskmanager.fragment.PeriodsFragment;
 import com.example.taskmanager.fragment.SearchFragment;
@@ -37,7 +37,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private static UiActions currentFragment;
     private static FragmentManager fragmentManager;
     private ProgressBar progressBar;
-    private DataManager dataManager;
+    private Synchronizer synchronizer;
     private DayFragment dayFragment;
     private PeriodsFragment periodsFragment;
     private SearchFragment searchFragment;
@@ -59,15 +58,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progressBar);
-        dataManager = DataManager.getInstance(getApplication());
+        synchronizer = Synchronizer.getInstance(getApplicationContext());
         fragmentManager = getSupportFragmentManager();
-        updateFromWeb();
+        updateFromWeb(true);
         initFragments();
         initNavigationButton();
         initFloatingButton();
         initCalendar();
         setCurrentFragment(periodsFragment);
-        triggerUpdateWorker();
     }
 
     @Override
@@ -90,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         if (id == R.id.calendarButton) {
             showCalendar();
         }else if(id == R.id.refreshButton) {
-            updateFromWeb();
+            updateFromWeb(false);
         }else if(id == R.id.warningButton) {
             Intent lateActivity = new Intent(MainActivity.this, LateTasksActivity.class);
             startActivity(lateActivity);
@@ -115,10 +113,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void triggerUpdateWorker(){
-        WorkManager.getInstance(this).cancelAllWork();
-        WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueue(workRequest);
-        WorkObserver.getInstance(this).observe(workRequest.getId());
+        WorkManager workManager = WorkManager.getInstance(this);
+        WorkObserver.removeObserver(workManager);
+        workManager.cancelAllWork();
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        workManager.enqueue(workRequest);
+        Observer<WorkInfo> newObserver = WorkObserver.createNewObserver(workManager);
+        workManager.getWorkInfoByIdLiveData(workRequest.getId()).observeForever(newObserver);
     }
 
     private boolean areThereLateTasks(){
@@ -168,21 +169,21 @@ public class MainActivity extends AppCompatActivity {
         };
     }
 
-    private void updateFromWeb(){
+    private void updateFromWeb(boolean triggerWorker) {
         Executors.newSingleThreadExecutor().submit(() -> {
-            try {
-                runOnUiThread(() -> {
-                    progressBar.setVisibility(View.VISIBLE);
-                    getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                });
-                dataManager.synchronizeFromWeb();
-                runOnUiThread(() -> {
-                    progressBar.setVisibility(View.GONE);
-                    getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-                });
-            } catch (ExecutionException | InterruptedException e) {
-                Log.e(MainActivity.class.getName(), e.getMessage(), e);
-            }
+            runOnUiThread(() -> {
+                progressBar.setVisibility(View.VISIBLE);
+                getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+            synchronizer.synchronizeFromWeb();
+            runOnUiThread(() -> {
+                progressBar.setVisibility(View.GONE);
+                getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+                currentFragment.updateMenu();
+                currentFragment.updateUI();
+            });
+            if(triggerWorker)
+                triggerUpdateWorker();
         });
     }
 

@@ -4,9 +4,11 @@ import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.taskmanager.database.DataManager;
+import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.enumerator.PeriodType;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.repository.room.AppDatabase;
+import com.example.taskmanager.repository.room.TaskDao;
 import com.example.taskmanager.util.DateUtil;
 
 import java.text.ParseException;
@@ -15,19 +17,22 @@ import java.util.Date;
 import java.util.List;
 
 public class TaskRepository {
-    private final DataManager dataManager;
+
+    private final TaskDao taskDao;
+    private final Synchronizer synchronizer;
 
     public TaskRepository(Application application) {
-        dataManager = DataManager.getInstance(application);
+        taskDao = AppDatabase.getDatabase(application).taskDao();
+        synchronizer = Synchronizer.getInstance(application);
     }
 
     public MutableLiveData<Task> getTaskById(MutableLiveData<Task> mutableLiveData, long id){
-        mutableLiveData.setValue(dataManager.getById(id));
+        mutableLiveData.setValue(taskDao.getById(id));
         return mutableLiveData;
     }
 
     public MutableLiveData<List<Task>> getTasksByDate(MutableLiveData<List<Task>> mutableLiveData, String date){
-        mutableLiveData.setValue(dataManager.getByDate(date));
+        mutableLiveData.setValue(taskDao.getByDate(date));
         return mutableLiveData;
     }
 
@@ -68,29 +73,32 @@ public class TaskRepository {
     }
 
     public MutableLiveData<List<Task>> getTasksByTitleOrTextOrDate(MutableLiveData<List<Task>> mutableLiveData, String typing){
-        mutableLiveData.setValue(dataManager.getByTitleOrTextOrDate(typing));
+        mutableLiveData.setValue(taskDao.getTasksByTitleOrTextOrDate(typing));
         return mutableLiveData;
     }
 
     public void insertTask(Task task){
-            dataManager.insert(task, true);
+            taskDao.insert(task);
+            synchronizer.synchronizeFromRoom();
     }
 
     public void deleteTask(Task task){
-        dataManager.delete(task, true);
+        taskDao.delete(task);
+        synchronizer.synchronizeFromRoom();
     }
 
     public void updateTask(Task task){
-            dataManager.update(task, true);
+        taskDao.update(task);
+        synchronizer.synchronizeFromRoom();
     }
 
     public MutableLiveData<List<Task>> getAll(MutableLiveData<List<Task>> mutableLiveData){
-        mutableLiveData.setValue(dataManager.getAll(false));
+        mutableLiveData.setValue(taskDao.getAll());
         return mutableLiveData;
     }
 
     private List<Task> getRawTasksByDate(String date){
-        return new ArrayList<>(dataManager.getByDate(date));
+        return new ArrayList<>(taskDao.getByDate(date));
     }
 
     private List<Task> getTasksByPeriod(String startDate, String endDate){

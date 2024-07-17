@@ -109,10 +109,12 @@ public class PeriodsFragment extends Fragment implements UiActions {
         ArrayAdapter<String> adapterUntil = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_dropdown_item_1line, itemsUntil);
         dropdownUntil.setAdapter(adapterUntil);
         dropdownUntil.setText(get(R.string._3_days), false);
+        dropdownUntil.setTextColor(getResources().getColor(R.color.white));
         String[] itemsOrder = new String[] { get(R.string.date_order), get(R.string.priority_order)};
         ArrayAdapter<String> adapterOrder = new ArrayAdapter<>(requireActivity(), android.R.layout.simple_dropdown_item_1line, itemsOrder);
         dropdownOrder.setAdapter(adapterOrder);
         dropdownOrder.setText(get(R.string.date_order), false);
+        dropdownOrder.setTextColor(getResources().getColor(R.color.white));
     }
 
     private AdapterView.OnItemClickListener dropdownUntilAction() {
@@ -153,8 +155,10 @@ public class PeriodsFragment extends Fragment implements UiActions {
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED PERIODS");
-        updateMenu();
-        updateUI();
+        requireActivity().runOnUiThread(() -> {
+            updateMenu();
+            updateUI();
+        });
     }
 
     @Override

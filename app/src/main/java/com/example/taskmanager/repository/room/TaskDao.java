@@ -1,4 +1,4 @@
-package com.example.taskmanager.database;
+package com.example.taskmanager.repository.room;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -12,7 +12,7 @@ import com.example.taskmanager.model.Task;
 import java.util.List;
 
 @Dao
-interface TaskDao {
+public interface TaskDao {
     @Query("SELECT * FROM task")
     List<Task> getAll();
 

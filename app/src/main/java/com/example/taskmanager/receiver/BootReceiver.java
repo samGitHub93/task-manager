@@ -4,9 +4,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
+import androidx.lifecycle.Observer;
 import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.example.taskmanager.worker.UpdateWorker;
 import com.example.taskmanager.worker.WorkObserver;
@@ -19,9 +20,13 @@ public class BootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Objects.equals(intent.getAction(), "android.intent.action.BOOT_COMPLETED")) {
-            WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
-            WorkManager.getInstance(context).enqueue(workRequest);
-            WorkObserver.getInstance(context).observe(workRequest.getId());
+            WorkManager workManager = WorkManager.getInstance(context);
+            WorkObserver.removeObserver(workManager);
+            workManager.cancelAllWork();
+            PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+            workManager.enqueue(workRequest);
+            Observer<WorkInfo> newObserver = WorkObserver.createNewObserver(workManager);
+            workManager.getWorkInfoByIdLiveData(workRequest.getId()).observeForever(newObserver);
         }
     }
 }

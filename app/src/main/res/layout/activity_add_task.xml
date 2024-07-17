@@ -45,6 +45,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
+                app:cursorColor="@color/gray"
                 android:layout_margin="10dp"
                 android:layout_marginTop="10dp">
                 <com.example.taskmanager.view_item.TaskTextView
@@ -68,6 +69,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
+                app:cursorColor="@color/gray"
                 android:layout_margin="10dp">
                 <com.example.taskmanager.view_item.TaskTextView
                     android:id="@+id/details_text_view"

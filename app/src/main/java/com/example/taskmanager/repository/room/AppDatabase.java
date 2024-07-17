@@ -1,4 +1,4 @@
-package com.example.taskmanager.database;
+package com.example.taskmanager.repository.room;
 
 import android.content.Context;
 
@@ -9,13 +9,13 @@ import androidx.room.RoomDatabase;
 import com.example.taskmanager.model.Task;
 
 @Database(entities = {Task.class}, version = 1, exportSchema = false)
-abstract class AppDatabase extends RoomDatabase {
+public abstract class AppDatabase extends RoomDatabase {
 
     private static final Object LOCK = new Object();
     private static final String DATABASE_NAME = "tasks_db";
     private static volatile AppDatabase INSTANCE;
 
-    static AppDatabase getDatabase(Context context) {
+    public static AppDatabase getDatabase(Context context) {
         if (INSTANCE == null) {
             synchronized (LOCK) {
                 if (INSTANCE == null) {
@@ -28,5 +28,5 @@ abstract class AppDatabase extends RoomDatabase {
         return INSTANCE;
     }
 
-    abstract TaskDao taskDao();
+    public abstract TaskDao taskDao();
 }

@@ -3,7 +3,7 @@
     android:id="@+id/scroll"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/gray_very_huge"
+    android:background="@color/black"
     android:orientation="vertical">
 
     <android.widget.SearchView
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:queryHint="@string/search"
-        android:background="@android:drawable/editbox_dropdown_light_frame"
+        android:background="@drawable/card_shape"
         android:layout_margin="10dp" />
 
     <LinearLayout

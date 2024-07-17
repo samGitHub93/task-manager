@@ -46,13 +46,6 @@
             android:exported="true"
             android:label="Late tasks">
         </activity>
-        <service
-            android:name=".foreground_service.ForegroundService"
-            android:foregroundServiceType="dataSync"
-            android:exported="true"
-            android:permission="android.permission.POST_NOTIFICATIONS"
-            android:enabled="true">
-        </service>
         <receiver
             android:name=".receiver.NotificationReceiver"
             android:exported="true"
@@ -62,7 +55,7 @@
             </intent-filter>
         </receiver>
         <receiver android:name=".receiver.BootReceiver"
-            android:enabled="false"
+            android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

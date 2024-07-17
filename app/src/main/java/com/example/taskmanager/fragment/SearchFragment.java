@@ -126,8 +126,10 @@ public class SearchFragment extends Fragment implements UiActions {
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED SEARCH");
-        updateMenu();
-        updateUI();
+        requireActivity().runOnUiThread(() -> {
+            updateMenu();
+            updateUI();
+        });
     }
 
     @Override

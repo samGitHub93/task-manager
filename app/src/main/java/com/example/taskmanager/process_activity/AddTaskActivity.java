@@ -9,21 +9,15 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.example.taskmanager.R;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
-import com.example.taskmanager.worker.UpdateWorker;
-import com.example.taskmanager.worker.WorkObserver;
 
 import java.util.Objects;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 public class AddTaskActivity extends ProcessTaskActivity {
 
@@ -83,7 +77,7 @@ public class AddTaskActivity extends ProcessTaskActivity {
 
     private boolean isValidNotificationDate(Task task){
         if(
-                (DateUtil.fromStringDateTimeToMillis(task.getNotify()) == 0 && !task.getNotify().trim().isEmpty()) ||
+                (!task.getNotify().trim().isEmpty() && DateUtil.fromStringDateTimeToMillis(task.getNotify()) == 0) ||
                         (!task.getNotify().trim().isEmpty() && DateUtil.fromStringDateTimeToMillis(task.getNotify()) - DateUtil.nowInMillis() < 0) ||
                         (Objects.requireNonNull(getTaskNotifyDate().getText()).toString().equals(EMPTY_STRING) && !Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING)) ||
                         (!getTaskNotifyDate().getText().toString().equals(EMPTY_STRING)&& Objects.requireNonNull(getTaskNotifyTime().getText()).toString().equals(EMPTY_STRING))){
@@ -116,13 +110,6 @@ public class AddTaskActivity extends ProcessTaskActivity {
         }
     }
 
-    public void triggerUpdateWorker(){
-        WorkManager.getInstance(this).cancelAllWork();
-        WorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
-        WorkManager.getInstance(this).enqueue(workRequest);
-        WorkObserver.getInstance(this).observe(workRequest.getId());
-    }
-
     private void insert(Task taskToInsert){
         Executors.newSingleThreadExecutor().submit(() -> {
             runOnUiThread(() -> {
@@ -130,7 +117,8 @@ public class AddTaskActivity extends ProcessTaskActivity {
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
             getTaskViewModel().insertTask(taskToInsert);
-            triggerUpdateWorker();
+            if(taskToInsert.getNotify() != null && !taskToInsert.getNotify().replaceAll(" ", "").isEmpty())
+                new Notifier().createAlarm(getApplicationContext(), taskToInsert);
             runOnUiThread(() -> {
                 disableProgressBar();
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

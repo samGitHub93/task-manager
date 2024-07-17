@@ -97,8 +97,10 @@ public class DayFragment extends Fragment implements UiActions {
     public void onResume() {
         super.onResume();
         System.out.println("RESUMED DAY");
-        updateUI();
-        updateMenu();
+        requireActivity().runOnUiThread(() -> {
+            updateMenu();
+            updateUI();
+        });
     }
 
     @Override
