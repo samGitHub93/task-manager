@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity {
     private static UiActions currentFragment;
     private static FragmentManager fragmentManager;
     private ProgressBar progressBar;
-    private Synchronizer synchronizer;
     private DayFragment dayFragment;
     private PeriodsFragment periodsFragment;
     private SearchFragment searchFragment;
@@ -58,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progressBar);
-        synchronizer = Synchronizer.getInstance(getApplicationContext());
         fragmentManager = getSupportFragmentManager();
         updateFromWeb(true);
         initFragments();
@@ -175,7 +173,7 @@ public class MainActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
-            synchronizer.synchronizeFromWeb();
+            new Synchronizer(getApplicationContext()).synchronizeFromWeb();
             runOnUiThread(() -> {
                 progressBar.setVisibility(View.GONE);
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

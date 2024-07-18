@@ -18,6 +18,7 @@ import com.example.taskmanager.process_activity.ModifyTaskActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
+import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.view_holder.ListViewHolder;
 import com.example.taskmanager.view_model.TaskViewModel;
@@ -138,6 +139,7 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
                 ((MainActivity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
             viewModel.updateTask(task);
+            new Synchronizer(context).synchronizeFromRoom();
             ((MainActivity) context).runOnUiThread(() -> {
                 disableProgressBar();
                 ((MainActivity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -152,6 +154,7 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
                 ((LateTasksActivity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
             viewModel.updateTask(task);
+            new Synchronizer(context).synchronizeFromRoom();
             ((LateTasksActivity) context).runOnUiThread(() -> {
                 disableProgressBar();
                 ((LateTasksActivity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

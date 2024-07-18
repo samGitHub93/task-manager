@@ -85,7 +85,7 @@ public class DayFragment extends Fragment implements UiActions {
     }
 
     private void createRecyclerView(List<Task> tasks){
-        TaskAdapter taskAdapter = new TaskAdapter(getContext(), viewModel, tasks);
+        TaskAdapter taskAdapter = new TaskAdapter(requireActivity(), viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_day);
         recyclerView.setAdapter(taskAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));

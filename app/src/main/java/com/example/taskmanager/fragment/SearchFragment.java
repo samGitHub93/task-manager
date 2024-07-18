@@ -36,6 +36,7 @@ public class SearchFragment extends Fragment implements UiActions {
     private Observer<List<Task>> currentObserver;
     private static final String INITIAL_VALUE = "######";
     private String query = INITIAL_VALUE;
+    private SearchView searchView;
 
     @Nullable
     @Override
@@ -48,7 +49,7 @@ public class SearchFragment extends Fragment implements UiActions {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        SearchView searchView = requireActivity().findViewById(R.id.search_view);
+        searchView = requireActivity().findViewById(R.id.search_view);
         searchView.setOnClickListener(clickAction());
         searchView.setOnQueryTextListener(searchAction());
     }
@@ -106,7 +107,7 @@ public class SearchFragment extends Fragment implements UiActions {
     }
 
     private void createRecyclerView(List<Task> tasks){
-        TaskAdapter taskAdapter = new TaskAdapter(getContext(), viewModel, tasks);
+        TaskAdapter taskAdapter = new TaskAdapter(requireActivity(), viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_search);
         recyclerView.setAdapter(taskAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -130,6 +131,7 @@ public class SearchFragment extends Fragment implements UiActions {
             updateMenu();
             updateUI();
         });
+        searchView.setIconified(false);
     }
 
     @Override

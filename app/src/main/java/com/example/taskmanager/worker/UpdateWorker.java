@@ -34,7 +34,7 @@ public class UpdateWorker extends Worker {
     @Override
     public Result doWork() {
         try {
-            synchronizer = Synchronizer.getInstance(getApplicationContext());
+            synchronizer = new Synchronizer(getApplicationContext());
             allTasks = synchronizer.directlyGetAll();
             if(allTasks.isEmpty()) {
                 Log.i(UpdateWorker.class.getName(), "Tasks list is empty.");

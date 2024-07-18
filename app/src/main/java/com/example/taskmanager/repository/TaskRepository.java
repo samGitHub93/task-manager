@@ -4,7 +4,6 @@ import android.app.Application;
 
 import androidx.lifecycle.MutableLiveData;
 
-import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.enumerator.PeriodType;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.room.AppDatabase;
@@ -19,11 +18,9 @@ import java.util.List;
 public class TaskRepository {
 
     private final TaskDao taskDao;
-    private final Synchronizer synchronizer;
 
     public TaskRepository(Application application) {
         taskDao = AppDatabase.getDatabase(application).taskDao();
-        synchronizer = Synchronizer.getInstance(application);
     }
 
     public MutableLiveData<Task> getTaskById(MutableLiveData<Task> mutableLiveData, long id){
@@ -78,18 +75,15 @@ public class TaskRepository {
     }
 
     public void insertTask(Task task){
-            taskDao.insert(task);
-            synchronizer.synchronizeFromRoom();
+        taskDao.insert(task);
     }
 
     public void deleteTask(Task task){
         taskDao.delete(task);
-        synchronizer.synchronizeFromRoom();
     }
 
     public void updateTask(Task task){
         taskDao.update(task);
-        synchronizer.synchronizeFromRoom();
     }
 
     public MutableLiveData<List<Task>> getAll(MutableLiveData<List<Task>> mutableLiveData){

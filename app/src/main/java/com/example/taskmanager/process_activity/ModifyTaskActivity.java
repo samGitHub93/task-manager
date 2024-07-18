@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import com.example.taskmanager.R;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
+import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
@@ -156,9 +157,9 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
             getTaskViewModel().updateTask(taskToUpdate);
+            new Synchronizer(getApplicationContext()).synchronizeFromRoom();
             if(taskToUpdate.getNotify() != null && !taskToUpdate.getNotify().replaceAll(" ", "").isEmpty())
                 new Notifier().createAlarm(getApplicationContext(), taskToUpdate);
-            //triggerUpdateWorker();
             runOnUiThread(() -> {
                 disableProgressBar();
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
@@ -173,7 +174,7 @@ public class ModifyTaskActivity extends ProcessTaskActivity {
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
             getTaskViewModel().deleteTask(taskToDelete);
-            //triggerUpdateWorker();
+            new Synchronizer(getApplicationContext()).synchronizeFromRoom();
             runOnUiThread(() -> {
                 disableProgressBar();
                 getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);

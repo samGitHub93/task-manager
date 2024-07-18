@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import com.example.taskmanager.R;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.notification.Notifier;
+import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.util.DateUtil;
 import com.example.taskmanager.util.TaskUtil;
 
@@ -117,6 +118,7 @@ public class AddTaskActivity extends ProcessTaskActivity {
                 getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
             });
             getTaskViewModel().insertTask(taskToInsert);
+            new Synchronizer(getApplicationContext()).synchronizeFromRoom();
             if(taskToInsert.getNotify() != null && !taskToInsert.getNotify().replaceAll(" ", "").isEmpty())
                 new Notifier().createAlarm(getApplicationContext(), taskToInsert);
             runOnUiThread(() -> {

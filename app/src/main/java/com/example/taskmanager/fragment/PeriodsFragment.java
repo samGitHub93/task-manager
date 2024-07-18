@@ -96,11 +96,11 @@ public class PeriodsFragment extends Fragment implements UiActions {
     }
 
     private void createRecyclerView(List<Task> tasks){
-        TaskAdapter taskAdapter = new TaskAdapter(getContext(), viewModel, tasks);
+        TaskAdapter taskAdapter = new TaskAdapter(requireActivity(), viewModel, tasks);
         RecyclerView recyclerView = requireActivity().findViewById(R.id.recycler_periods);
         recyclerView.setAdapter(taskAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskSwiper(getContext()));
+        ItemTouchHelper itemTouchHelperDone = new ItemTouchHelper(new TaskSwiper(requireActivity().getApplicationContext()));
         itemTouchHelperDone.attachToRecyclerView(recyclerView);
     }
 
