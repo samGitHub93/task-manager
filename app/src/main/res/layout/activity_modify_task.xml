@@ -21,7 +21,7 @@
         android:id="@+id/scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="60dp"
+        android:layout_marginBottom="80dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -34,8 +34,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:layout_marginStart="10dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginStart="20dp"
                 android:text="@string/title_label"
                 android:textColor="@color/white">
             </TextView>
@@ -43,15 +43,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
+                app:boxStrokeWidth="0dp"
+                android:background="@drawable/card_shape_white"
                 app:cursorColor="@color/gray"
-                android:layout_margin="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginTop="10dp">
                 <com.example.taskmanager.view_item.TaskTextView
                     android:id="@+id/title_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/gray_very_huge"
-                    android:textColor="@color/white">
+                    android:layout_margin="3dp"
+                    android:background="@drawable/card_shape_white"
+                    android:textColor="@color/gray_huge">
                 </com.example.taskmanager.view_item.TaskTextView>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -59,23 +63,28 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/details_label"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
                 android:textColor="@color/white">
             </TextView>
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="5dp"
+                app:boxStrokeWidth="0dp"
+                android:background="@drawable/card_shape_white"
                 app:cursorColor="@color/gray"
-                android:layout_margin="10dp">
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="10dp">
                 <com.example.taskmanager.view_item.TaskTextView
                     android:id="@+id/details_text_view"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minLines="3"
-                    android:background="@color/gray_very_huge"
-                    android:textColor="@color/white">
+                    android:layout_margin="3dp"
+                    android:background="@drawable/card_shape_white"
+                    android:textColor="@color/gray_huge">
                 </com.example.taskmanager.view_item.TaskTextView>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -84,20 +93,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/date_label"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
                 android:textColor="@color/white">
             </TextView>
             <com.example.taskmanager.view_item.DateTextView
                 android:id="@+id/date_text_view"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="10dp"
+                app:boxStrokeWidth="0dp"
                 android:padding="5dp"
-                android:hint="@string/date_hint"
-                android:textColorHint="@color/gray"
-                android:background="@color/gray_very_huge"
-                android:textColor="@color/white"
+                android:background="@drawable/card_shape_white"
+                android:textColor="@color/gray_huge"
                 android:inputType="none"
                 android:focusable="false"
                 android:autofillHints="">
@@ -108,14 +118,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/priority_label_text"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
                 android:textColor="@color/white">
             </TextView>
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginTop="10dp"
+                app:boxStrokeWidth="0dp"
+                android:background="@drawable/card_shape_white"
                 android:padding="5dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
                 <com.example.taskmanager.view_item.DropDown
@@ -123,8 +137,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="false"
-                    android:background="@color/gray_lite"
-                    android:textColor="@color/gray_very_huge"
+                    android:layout_margin="3dp"
+                    android:background="@drawable/card_shape_white"
+                    android:textColor="@color/gray_huge"
                     android:hint="@string/priority_label">
                 </com.example.taskmanager.view_item.DropDown>
             </com.google.android.material.textfield.TextInputLayout>
@@ -134,8 +149,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/recurring_label_text"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
                 android:textColor="@color/white">
             </TextView>
             <LinearLayout
@@ -146,17 +161,22 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="10dp"
                     android:layout_weight="1"
                     android:padding="5dp"
+                    app:boxStrokeWidth="0dp"
+                    android:background="@drawable/card_shape_white"
                     style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
                     <com.example.taskmanager.view_item.DropDown
                         android:id="@+id/recurring_text_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:enabled="false"
-                        android:background="@color/gray_lite"
-                        android:textColor="@color/gray_very_huge"
+                        android:layout_margin="3dp"
+                        android:background="@drawable/card_shape_white"
+                        android:textColor="@color/gray_huge"
                         android:hint="@string/none_hint">
                     </com.example.taskmanager.view_item.DropDown>
                 </com.google.android.material.textfield.TextInputLayout>
@@ -166,11 +186,13 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:padding="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
                     android:hint="@string/until_none"
                     android:textColorHint="@color/gray"
-                    android:background="@color/gray_very_huge"
+                    android:background="@drawable/card_shape_gray_very_huge"
                     android:textColor="@color/white"
                     android:inputType="none"
                     android:focusable="false"
@@ -183,8 +205,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/notification_label"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="20dp"
                 android:textColor="@color/white">
             </TextView>
             <LinearLayout
@@ -198,11 +220,14 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_weight="1"
-                    android:layout_margin="10dp"
-                    android:padding="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
                     android:hint="@string/date_none"
                     android:textColorHint="@color/gray"
-                    android:background="@color/gray_very_huge"
+                    android:background="@drawable/card_shape_gray_very_huge"
                     android:textColor="@color/white"
                     android:inputType="none"
                     android:focusable="false"
@@ -214,11 +239,14 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:layout_gravity="center"
-                    android:layout_margin="10dp"
-                    android:padding="5dp"
+                    android:layout_marginStart="20dp"
+                    android:layout_marginEnd="20dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:padding="10dp"
                     android:hint="@string/time_none"
                     android:textColorHint="@color/gray"
-                    android:background="@color/gray_very_huge"
+                    android:background="@drawable/card_shape_gray_very_huge"
                     android:textColor="@color/white"
                     android:inputType="none"
                     android:focusable="false"
@@ -232,37 +260,60 @@
 
     <LinearLayout
         android:id="@+id/linear_button"
+        android:baselineAligned="false"
         app:layout_constraintBottom_toBottomOf="parent"
         android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:background="@color/gray_very_huge">
 
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:background="@drawable/card_shape_green_lite"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="30dp">
         <Button
             android:id="@+id/modify_button"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:backgroundTint="@color/white"
-            android:textColor="@color/black"
+            android:background="@drawable/card_shape_green_lite"
+            android:textColor="@color/green_lite"
+            android:layout_margin="1dp"
             android:text="@string/modify_button_label"
             android:layout_gravity="center"
-            android:layout_margin="10dp"
-            style="?android:attr/buttonBarButtonStyle">
+            style="?android:attr/buttonStyleSmall">
         </Button>
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/card_shape_red_lite"
+        android:layout_weight="1"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="30dp"
+        android:layout_marginEnd="60dp">
         <Button
             android:id="@+id/delete_button"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:backgroundTint="@color/red"
-            android:textColor="@color/black"
+            android:background="@drawable/card_shape_red_lite"
+            android:textColor="@color/red_lite"
+            android:layout_margin="1dp"
             android:text="@string/delete_button_label"
-            android:layout_margin="10dp"
-            style="?android:attr/buttonBarButtonStyle">
+            style="?android:attr/buttonStyleSmall">
         </Button>
+    </LinearLayout>
 
     </LinearLayout>
 </RelativeLayout>

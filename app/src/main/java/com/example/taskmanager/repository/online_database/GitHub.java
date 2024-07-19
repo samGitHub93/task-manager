@@ -26,9 +26,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 class GitHub {
     private static final String REPO_URL = BuildConfig.REPO_URL;
@@ -121,14 +123,15 @@ class GitHub {
             else return;
             Log.i(GitHub.class.getName(), "Cache path: " + cacheDir);
             assert cacheDir != null;
-            int fileInCache = Objects.requireNonNull(cacheDir.listFiles()).length;
-            Log.i(GitHub.class.getName(), "Files in cache: " + fileInCache);
-            if(fileInCache > 20) {
-                if(forWorker)
-                    clearWorkerCache(Objects.requireNonNull(cacheDir));
-                else
-                    clearSyncCache(Objects.requireNonNull(cacheDir));
-            }
+            List<File> filesInCache = Arrays.asList(cacheDir.listFiles());
+            List<File> workerCacheFiles = filesInCache.stream().filter(f -> f.getName().contains("GitWorker")).collect(Collectors.toList());
+            Log.i(GitHub.class.getName(), "Worker files in cache: " + workerCacheFiles.size());
+            List<File> syncCacheFiles = filesInCache.stream().filter(f -> f.getName().contains("GitRepo")).collect(Collectors.toList());
+            Log.i(GitHub.class.getName(), "Sync files in cache: " + syncCacheFiles.size());
+            if(workerCacheFiles.size() >= 8 && forWorker)
+                clearWorkerCache(Objects.requireNonNull(cacheDir));
+            if(syncCacheFiles.size() >= 8 && !forWorker)
+                clearSyncCache(Objects.requireNonNull(cacheDir));
         } catch (Exception e) {
             Log.e(GitHub.class.getName(), e.getMessage(), e);
         }

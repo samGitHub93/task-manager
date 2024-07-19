@@ -10,4 +10,6 @@
 
     <color name="red_lite">#FF8888</color>
     <color name="red_huge">#882222</color>
+
+    <color name="green_lite">#88FF88</color>
 </resources>

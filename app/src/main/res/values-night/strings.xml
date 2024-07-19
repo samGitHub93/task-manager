@@ -20,8 +20,8 @@
     <string name="date_hint">dd/MM/yyyy</string>
     <string name="priority_label">Priority:</string>
     <string name="recurring_label">Recurring:</string>
-    <string name="add_button_label">ADD</string>
-    <string name="modify_button_label">MODIFY</string>
+    <string name="add_button_label">SAVE</string>
+    <string name="modify_button_label">SAVE</string>
     <string name="delete_button_label">DELETE</string>
     <string name="delete_dialog_title">Are you sure you want to delete the task?</string>
     <string name="confirm_dialog">Confirm</string>

@@ -41,8 +41,10 @@ public class DateTextView extends TextInputEditText {
 
     private View.OnClickListener dateTextViewActionTaskDate(){
         return view -> {
-            ((TextInputEditText) view).setText(EMPTY_STRING);
-            datePicker.show(((AppCompatActivity)context).getSupportFragmentManager(),null);
+            if(!datePicker.isAdded()){
+                ((TextInputEditText) view).setText(EMPTY_STRING);
+                datePicker.show(((AppCompatActivity)context).getSupportFragmentManager(),null);
+            }
         };
     }
 

@@ -10,5 +10,4 @@ public class TaskTextView extends AppCompatAutoCompleteTextView {
     public TaskTextView(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
-
 }
