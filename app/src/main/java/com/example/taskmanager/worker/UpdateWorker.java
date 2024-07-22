@@ -37,7 +37,7 @@ public class UpdateWorker extends Worker {
             synchronizer = new Synchronizer(getApplicationContext());
             allTasks = synchronizer.directlyGetAll();
             if(allTasks.isEmpty()) {
-                Log.i(UpdateWorker.class.getName(), "Tasks list is empty.");
+                Log.e(UpdateWorker.class.getName(), "Tasks list is empty.");
                 return Result.failure();
             }
             saveRecurringTasks();
@@ -53,7 +53,7 @@ public class UpdateWorker extends Worker {
     private void saveRecurringTasks() throws ParseException {
         List<Task> tasks = new ArrayList<>(allTasks);
         long newId = createNewId(tasks);
-        List<Task> recurringTasks = tasks.stream().filter(t -> t.getRecurringType() != RecurringType.NONE).collect(Collectors.toList());
+        List<Task> recurringTasks = tasks.stream().filter(t -> t.getRecurringType() != RecurringType.NONE && !t.isDone()).collect(Collectors.toList());
         for (Task task : recurringTasks) {
             Task newTask = createNewRecurringTask(task, newId);
             List<Task> taskByDate = recurringTasks.stream().filter((t) -> t.isEqual(newTask)).collect(Collectors.toList());
@@ -67,7 +67,7 @@ public class UpdateWorker extends Worker {
 
     private void deleteOldTasks() {
         List<Task> tasks = new ArrayList<>(allTasks);
-        List<Task> filteredTasks = tasks.stream().filter(t -> DateUtil.getDateFromString(t.getDate()).before(DateUtil.getDatePlusYears(DateUtil.getTodayWithoutTime(), -1))).collect(Collectors.toList());
+        List<Task> filteredTasks = tasks.stream().filter(t -> DateUtil.getDateFromString(t.getDate()).before(DateUtil.getDatePlusYears(DateUtil.getTodayWithoutTime(), -1)) && t.isDone()).collect(Collectors.toList());
         if(filteredTasks.isEmpty())
             return;
         synchronizer.directlyDeleteOldTasks(allTasks, filteredTasks);
@@ -75,22 +75,26 @@ public class UpdateWorker extends Worker {
 
     private void createAlarms(){
         List<Task> tasks = new ArrayList<>(allTasks);
-        List<Task> filteredTasks = tasks.stream().filter(t -> !filter(t)).collect(Collectors.toList());
+        List<Task> filteredTasks = tasks.stream().filter(this::hasNotification).collect(Collectors.toList());
         if (!filteredTasks.isEmpty()) {
             Notifier notifier = new Notifier();
             filteredTasks.forEach(task -> {
                 notifier.cancelAlarm(getApplicationContext(), task);
                 notifier.createAlarm(getApplicationContext(), task);
-                Log.i("INFO WORKER", "Uploaded task with TITLE = " + task.getTitle());
+                Log.i("INFO WORKER", "Created alarm for " + task.getTitle());
             });
         }
     }
 
-    private boolean filter(Task task){
-        return (task.getNotify().trim().isEmpty() ||
-                task.isDone() ||
-                DateUtil.fromStringDateTimeToMillis(task.getNotify()) + (1000*60*5) < DateUtil.nowInMillis() ||
-                DateUtil.fromStringDateTimeToMillis(task.getNotify()) > DateUtil.nowInMillis() + (1000*60*60*24*3));
+    private boolean hasNotification(Task task){
+        if(!task.getNotify().replaceAll(" ", "").isEmpty()) {
+            long nowInMillis = DateUtil.nowInMillis();
+            long notifyInMillis = DateUtil.fromStringDateTimeToMillis(task.getNotify());
+            return !task.getNotify().replaceAll(" ", "").isEmpty() &&
+                    !task.isDone() &&
+                    notifyInMillis + (1000*60*5) > nowInMillis &&
+                    notifyInMillis < nowInMillis + (1000*60*60*24*3);
+        } else return false;
     }
 
     private Task createNewRecurringTask(Task task, long newId) throws ParseException {
