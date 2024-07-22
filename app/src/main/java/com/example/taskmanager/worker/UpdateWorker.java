@@ -53,7 +53,7 @@ public class UpdateWorker extends Worker {
     private void saveRecurringTasks() throws ParseException {
         List<Task> tasks = new ArrayList<>(allTasks);
         long newId = createNewId(tasks);
-        List<Task> recurringTasks = tasks.stream().filter(t -> t.getRecurringType() != RecurringType.NONE && !t.isDone()).collect(Collectors.toList());
+        List<Task> recurringTasks = tasks.stream().filter(t -> t.getRecurringType() != RecurringType.NONE && !t.isDone() && DateUtil.fromStringDateToMillis(t.getRecurringUntil()) > DateUtil.nowInMillis()).collect(Collectors.toList());
         for (Task task : recurringTasks) {
             Task newTask = createNewRecurringTask(task, newId);
             List<Task> taskByDate = recurringTasks.stream().filter((t) -> t.isEqual(newTask)).collect(Collectors.toList());
