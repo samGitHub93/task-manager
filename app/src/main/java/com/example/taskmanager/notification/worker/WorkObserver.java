@@ -1,8 +1,9 @@
-package com.example.taskmanager.worker;
+package com.example.taskmanager.notification.worker;
 
 import android.util.Log;
 
 import androidx.lifecycle.Observer;
+import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -28,11 +29,11 @@ public class WorkObserver {
 
     public static Observer<WorkInfo> createNewObserver(WorkManager workManager){
         Observer<WorkInfo> newObserver = workInfo -> {
-            if (workInfo.getState() == WorkInfo.State.CANCELLED) {
-                Log.i("WORKER INFO", "Worker " + id + " was cancelled.");
+            if (workInfo != null && workInfo.getState() == WorkInfo.State.CANCELLED) {
+                Log.i("WORKER OBSERVER", "Worker " + id + " was cancelled.");
                 PeriodicWorkRequest newWorkRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
-                workManager.enqueue(newWorkRequest);
-                Log.i("WORKER INFO", "New worker " + newWorkRequest.getId() + " started.");
+                workManager.enqueueUniquePeriodicWork("update_worker", ExistingPeriodicWorkPolicy.KEEP, newWorkRequest);
+                Log.i("WORKER OBSERVER", "New worker " + newWorkRequest.getId() + " started.");
                 observe(workManager, newWorkRequest.getId());
                 id = newWorkRequest.getId();
             }

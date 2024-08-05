@@ -15,6 +15,7 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <application
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -25,7 +26,8 @@
         tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:configChanges="orientation|screenSize|layoutDirection">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -34,33 +36,47 @@
         <activity
             android:name=".process_activity.AddTaskActivity"
             android:exported="true"
-            android:label="New task">
+            android:label="New task"
+            android:configChanges="orientation|screenSize|layoutDirection">
         </activity>
         <activity
             android:name=".process_activity.ModifyTaskActivity"
             android:exported="true"
-            android:label="Modify/Delete task">
+            android:label="Modify/Delete task"
+            android:configChanges="orientation|screenSize|layoutDirection">
         </activity>
         <activity
             android:name=".LateTasksActivity"
             android:exported="true"
-            android:label="Late tasks">
+            android:label="Late tasks"
+            android:configChanges="orientation|screenSize|layoutDirection">
+        </activity>
+        <activity
+            android:name=".DayActivity"
+            android:exported="true"
+            android:label="Task list"
+            android:configChanges="orientation|screenSize|layoutDirection">
         </activity>
         <receiver
-            android:name=".receiver.NotificationReceiver"
+            android:name=".notification.receiver.NotificationReceiver"
             android:exported="true"
             android:permission="android.permission.POST_NOTIFICATIONS">
             <intent-filter>
                 <action android:name="NOTIFY" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".receiver.BootReceiver"
+        <receiver android:name=".notification.receiver.BootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <service
+            android:name=".notification.foreground_service.ForegroundService"
+            android:foregroundServiceType="dataSync"
+            android:exported="false">
+        </service>
     </application>
 
 </manifest>

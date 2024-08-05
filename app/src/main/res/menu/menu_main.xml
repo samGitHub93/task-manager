@@ -8,12 +8,6 @@
         android:icon="@drawable/ic_baseline_warning_red_24"
         />
     <item
-        android:id="@+id/calendarButton"
-        android:title=""
-        app:showAsAction="always"
-        android:icon="@drawable/ic_baseline_event_24"
-        />
-    <item
         android:id="@+id/refreshButton"
         android:title=""
         app:showAsAction="ifRoom"

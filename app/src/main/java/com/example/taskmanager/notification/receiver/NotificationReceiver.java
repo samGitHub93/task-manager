@@ -1,4 +1,4 @@
-package com.example.taskmanager.receiver;
+package com.example.taskmanager.notification.receiver;
 
 import android.app.Notification;
 import android.app.NotificationChannel;

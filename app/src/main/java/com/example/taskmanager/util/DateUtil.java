@@ -1,9 +1,6 @@
 package com.example.taskmanager.util;
 
-import android.text.format.DateUtils;
 import android.util.Log;
-
-import com.example.taskmanager.receiver.NotificationReceiver;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -23,6 +20,8 @@ public class DateUtil {
     private static final SimpleDateFormat formatter = new SimpleDateFormat("EEEE dd MMMM yyyy", Locale.ITALIAN);
     private static final SimpleDateFormat dateTimeFormatter = new SimpleDateFormat("EEEE dd MMMM yyyy HH:mm", Locale.ITALIAN);
     private static final SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.ITALIAN);
+    private static final SimpleDateFormat simpleFormat = new SimpleDateFormat("dd MMMM yyyy", Locale.ITALIAN);
+    private static final SimpleDateFormat notifyFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.ITALIAN);
 
     public static SimpleDateFormat getFormatter(){
         return formatter;
@@ -33,6 +32,14 @@ public class DateUtil {
     }
     public static SimpleDateFormat getTimeFormatter(){
         return timeFormatter;
+    }
+
+    public static SimpleDateFormat getSimpleFormatter(){
+        return simpleFormat;
+    }
+
+    public static SimpleDateFormat getNotifyFormatter(){
+        return notifyFormat;
     }
 
     public static List<Date> getDatesBetween(Date startDate, Date endDate) {
@@ -92,6 +99,26 @@ public class DateUtil {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         return calendar;
+    }
+
+    public static int getPositionOfFirstDay(Date date) {
+        Calendar calendar = new GregorianCalendar();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        int dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+        if(dayOfWeek == 1){
+            return 6;
+        }else return dayOfWeek - 2;
+    }
+
+    public static int getLastDayOfMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.add(Calendar.DATE, -1);
+        Date lastDayOfMonth = calendar.getTime();
+        return Integer.parseInt(simpleFormat.format(lastDayOfMonth).substring(0, 2));
     }
 
     public static Date getDateTimePlusDays(Date date, @SuppressWarnings("SameParameterValue") int i){
@@ -171,5 +198,9 @@ public class DateUtil {
 
     public static Date getTodayWithoutTime(){
         return DateUtil.getCalendarWithoutTime(new Date()).getTime();
+    }
+
+    public static String fromDateToString(Date date){
+        return getFormatter().format(date);
     }
 }

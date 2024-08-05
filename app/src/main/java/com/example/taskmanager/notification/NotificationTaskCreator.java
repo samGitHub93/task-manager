@@ -10,8 +10,6 @@ import androidx.core.app.NotificationCompat;
 
 import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
-import com.example.taskmanager.receiver.BootReceiver;
-import com.example.taskmanager.receiver.NotificationReceiver;
 
 public class NotificationTaskCreator {
 

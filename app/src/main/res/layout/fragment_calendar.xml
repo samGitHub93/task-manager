@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/scroll"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+    <LinearLayout
+        android:id="@+id/linear_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:paddingVertical="10dp"
+        android:background="@color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/week_layout"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="5dp"
+            android:gravity="start">
+
+            <TextView
+                android:id="@+id/text_arrow_left"
+                android:background="@drawable/card_shape_gray_huge"
+                android:foreground="@drawable/arrow_left_24"
+                android:layout_width="50dp"
+                android:layout_height="match_parent">
+            </TextView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/text_month"
+                android:padding="10dp"
+                android:background="@drawable/card_shape_gray_huge"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent">
+            </TextView>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="50dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="5dp"
+            android:gravity="end">
+
+            <TextView
+                android:id="@+id/text_arrow_right"
+                android:background="@drawable/card_shape_gray_huge"
+                android:foreground="@drawable/arrow_right_24"
+                android:layout_width="50dp"
+                android:layout_height="match_parent">
+            </TextView>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/week_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/linear_date"
+        app:layout_constraintBottom_toTopOf="@id/scroll_linear_layout"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/gray_very_huge">
+
+        <include layout="@layout/calendar_week_row"
+            android:id="@+id/week_row"/>
+
+    </LinearLayout>
+
+        <ScrollView
+            android:id="@+id/scroll_linear_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/week_layout"
+            app:layout_constraintBottom_toTopOf="parent">
+            <LinearLayout
+                android:id="@+id/days_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <include layout="@layout/calendar_row"
+                    android:id="@+id/c_row_1">
+                </include>
+
+                <include layout="@layout/calendar_row"
+                    android:id="@+id/c_row_2">
+                </include>
+
+                <include layout="@layout/calendar_row"
+                    android:id="@+id/c_row_3">
+                </include>
+
+                <include layout="@layout/calendar_row"
+                    android:id="@+id/c_row_4">
+                </include>
+
+                <include layout="@layout/calendar_row"
+                    android:id="@+id/c_row_5">
+                </include>
+
+                <include layout="@layout/calendar_row"
+                    android:id="@+id/c_row_6">
+                </include>
+            </LinearLayout>
+        </ScrollView>
+
+</LinearLayout>

@@ -12,4 +12,9 @@
     <color name="red_huge">#882222</color>
 
     <color name="green_lite">#88FF88</color>
+    <color name="green_huge">#225522</color>
+
+    <color name="yellow">#FFDD66</color>
+
+    <color name="blue">#0000AA</color>
 </resources>

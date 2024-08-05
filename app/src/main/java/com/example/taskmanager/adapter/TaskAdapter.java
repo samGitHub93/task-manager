@@ -12,14 +12,17 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmanager.DayActivity;
 import com.example.taskmanager.LateTasksActivity;
 import com.example.taskmanager.MainActivity;
+import com.example.taskmanager.enumerator.RecurringType;
 import com.example.taskmanager.process_activity.ModifyTaskActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.enumerator.PriorityType;
 import com.example.taskmanager.model.Task;
 import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.util.DateUtil;
+import com.example.taskmanager.util.StringUtil;
 import com.example.taskmanager.view_holder.ListViewHolder;
 import com.example.taskmanager.view_model.TaskViewModel;
 
@@ -50,22 +53,31 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
         viewHolder.getTextView1().setText(tasks.get(position).getTitle());
         viewHolder.getTextView2().setText(tasks.get(position).getText());
         viewHolder.getTextView3().setText(tasks.get(position).getDate());
-        viewHolder.getTextView4().setText("PRICE"); // TODO
         switchPriority(viewHolder, tasks.get(position).getPriorityType());
         viewHolder.getTextView1().setTextColor(Color.WHITE);
         viewHolder.getTextView2().setTextColor(Color.WHITE);
         viewHolder.getTextView3().setTextColor(Color.WHITE);
-        viewHolder.getTextView4().setTextColor(Color.WHITE);
+        viewHolder.getTextRec().setTextColor(Color.WHITE);
+        viewHolder.getTextAlarm().setTextColor(Color.WHITE);
         String notify = tasks.get(position).getNotify();
-        if(notify.trim().isEmpty() || DateUtil.fromStringDateTimeToMillis(notify) - DateUtil.nowInMillis() < 0)
+        if(notify.trim().isEmpty() || DateUtil.fromStringDateTimeToMillis(notify) - DateUtil.nowInMillis() < 0) {
             viewHolder.getNotify().setImageResource(R.drawable.alarm_off);
-        else viewHolder.getNotify().setImageResource(R.drawable.alarm_on);
+            viewHolder.getTextAlarm().setText("");
+        } else {
+            viewHolder.getNotify().setImageResource(R.drawable.alarm_on);
+                viewHolder.getTextAlarm().setText(DateUtil.getNotifyFormatter().format(DateUtil.fromStringDateTimeToMillis(notify)));
+        }
+        if(tasks.get(position).getRecurringType() != RecurringType.NONE){
+            viewHolder.getTextRec().setText(StringUtil.capFirstCharacter(tasks.get(position).getRecurringType().name()));
+        } else viewHolder.getTextRec().setText("");
         if(tasks.get(position).isDone()) {
             viewHolder.getIcon().setImageResource(R.drawable.circle_checked);
             viewHolder.getTextView1().setTextColor(Color.GRAY);
             viewHolder.getTextView2().setTextColor(Color.GRAY);
             viewHolder.getTextView3().setTextColor(Color.GRAY);
-            viewHolder.getTextView4().setTextColor(Color.GRAY);
+            viewHolder.getTextRec().setTextColor(Color.GRAY);
+            viewHolder.getTextAlarm().setTextColor(Color.GRAY);
+            viewHolder.getNotify().setImageResource(R.drawable.alarm_off);
         }
         viewHolder.itemView.setOnClickListener(onClickAction(viewHolder));
     }
@@ -127,8 +139,10 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
     private void update(Task task){
         if(context instanceof LateTasksActivity){
             updateLate(task);
-        }else{
+        }else if(context instanceof MainActivity){
             updateNotLate(task);
+        }else{
+            updateInDay(task);
         }
     }
 
@@ -162,14 +176,32 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
         });
     }
 
+    private void updateInDay(Task task){
+        Executors.newSingleThreadExecutor().submit(() -> {
+            ((DayActivity) context).runOnUiThread(() -> {
+                enableProgressBar();
+                ((DayActivity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+            viewModel.updateTask(task);
+            new Synchronizer(context).synchronizeFromRoom();
+            ((DayActivity) context).runOnUiThread(() -> {
+                disableProgressBar();
+                ((DayActivity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+            });
+        });
+    }
+
     @Override
     public void enableProgressBar() {
         if((context) instanceof MainActivity) {
             ((MainActivity) context).getProgressBar().setVisibility(View.VISIBLE);
             ((MainActivity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        }else{
+        }else if((context) instanceof LateTasksActivity){
             ((LateTasksActivity) context).getProgressBar().setVisibility(View.VISIBLE);
             ((LateTasksActivity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }else{
+            ((DayActivity) context).getProgressBar().setVisibility(View.VISIBLE);
+            ((DayActivity) context).getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE, WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
     }
 
@@ -178,9 +210,12 @@ public class TaskAdapter extends RecyclerView.Adapter<ListViewHolder> implements
         if((context) instanceof MainActivity) {
             ((MainActivity) context).getProgressBar().setVisibility(View.GONE);
             ((MainActivity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        }else{
+        }else if((context) instanceof LateTasksActivity){
             ((LateTasksActivity) context).getProgressBar().setVisibility(View.GONE);
             ((LateTasksActivity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }else{
+            ((DayActivity) context).getProgressBar().setVisibility(View.GONE);
+            ((DayActivity) context).getWindow().clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
         }
     }
 }

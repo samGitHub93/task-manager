@@ -6,7 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import com.example.taskmanager.model.Task;
-import com.example.taskmanager.receiver.NotificationReceiver;
+import com.example.taskmanager.notification.receiver.NotificationReceiver;
 import com.example.taskmanager.util.DateUtil;
 
 public class Notifier {
@@ -21,7 +21,8 @@ public class Notifier {
         Intent intent = prepareIntent();
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, Integer.parseInt(String.valueOf(task.getId())), intent, PendingIntent.FLAG_IMMUTABLE);
         long millis = DateUtil.fromStringDateTimeToMillis(task.getNotify());
-        alarmManager.setExact(AlarmManager.RTC_WAKEUP, millis, alarmIntent);
+        AlarmManager.AlarmClockInfo info = new AlarmManager.AlarmClockInfo(millis, alarmIntent);
+        alarmManager.setAlarmClock(info, alarmIntent);
     }
 
     public void cancelAlarm(Context context, Task task){

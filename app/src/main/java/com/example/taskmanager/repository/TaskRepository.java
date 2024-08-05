@@ -11,7 +11,11 @@ import com.example.taskmanager.repository.room.TaskDao;
 import com.example.taskmanager.util.DateUtil;
 
 import java.text.ParseException;
+import java.time.Month;
+import java.time.Year;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -33,10 +37,26 @@ public class TaskRepository {
         return mutableLiveData;
     }
 
+    public MutableLiveData<List<Task>> getTasksByMonth(MutableLiveData<List<Task>> mutableLiveData, Date date){
+        Calendar firstDay = Calendar.getInstance();
+        firstDay.setTime(date);
+        firstDay.set(Calendar.DAY_OF_MONTH, 1);
+        Date firstDate = firstDay.getTime();
+        Calendar lastDay = Calendar.getInstance();
+        lastDay.setTime(date);
+        lastDay.set(Calendar.DAY_OF_MONTH, DateUtil.getLastDayOfMonth(date));
+        Date lastDate = lastDay.getTime();
+        mutableLiveData.setValue(getTasksByPeriod(DateUtil.fromDateToString(firstDate), DateUtil.fromDateToString(lastDate)));
+        return mutableLiveData;
+    }
+
     public MutableLiveData<List<Task>> getTasksByPeriod(MutableLiveData<List<Task>> mutableLiveData, PeriodType periodType) {
         Date today = new Date();
         String strToday = DateUtil.getFormatter().format(today);
         switch (periodType) {
+            case _1_DAY:
+                mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusDays(today, 1))));
+                break;
             case _3_DAY:
                 mutableLiveData.setValue(getTasksByPeriod(strToday, DateUtil.getFormatter().format(DateUtil.getDatePlusDays(today, 3))));
                 break;

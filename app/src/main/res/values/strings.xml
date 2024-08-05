@@ -72,4 +72,17 @@
     <string name="date_none">Date: NONE</string>
     <string name="until_none">Until: NONE</string>
 
+    <!-- WEEK DAYS -->
+    <string name="monday">Mon</string>
+    <string name="tuesday">Tue</string>
+    <string name="wednesday">Wed</string>
+    <string name="thursday">Thu</string>
+    <string name="friday">Fri</string>
+    <string name="saturday">Sat</string>
+    <string name="sunday">Sun</string>
+    <string name="date_example">03/08/2024 00:00</string>
+    <string name="recurring_example">Yearly</string>
+    <string name="calendar">Calendar</string>
+    <string name="_1_day">Tomorrow</string>
+
 </resources>

@@ -54,6 +54,14 @@ public class TaskViewModel extends AndroidViewModel {
         return taskRepository.getTasksByPeriod(getTasksByPeriodLiveData, periodType);
     }
 
+    public MutableLiveData<List<Task>> getTasksByMonth(Date date) {
+        if (getTasksByPeriodLiveData == null) {
+            getTasksByPeriodLiveData = new MutableLiveData<>();
+            getTasksByPeriodLiveData = taskRepository.getTasksByMonth(getTasksByPeriodLiveData, date);
+        }
+        return taskRepository.getTasksByMonth(getTasksByPeriodLiveData, date);
+    }
+
     public MutableLiveData<List<Task>> getTasksByTitleOrTextOrDate(String typing){
         if (getTasksByTitleOrTextOrDateLiveData == null) {
             getTasksByTitleOrTextOrDateLiveData = new MutableLiveData<>();

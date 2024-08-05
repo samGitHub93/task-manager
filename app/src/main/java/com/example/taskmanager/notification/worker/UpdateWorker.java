@@ -1,12 +1,24 @@
-package com.example.taskmanager.worker;
+package com.example.taskmanager.notification.worker;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Observer;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
+import com.example.taskmanager.notification.NotificationChannelCreator;
+import com.example.taskmanager.notification.NotificationTaskCreator;
 import com.example.taskmanager.repository.online_database.Synchronizer;
 import com.example.taskmanager.enumerator.RecurringType;
 import com.example.taskmanager.model.Task;
@@ -19,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class UpdateWorker extends Worker {
@@ -43,6 +56,7 @@ public class UpdateWorker extends Worker {
             saveRecurringTasks();
             deleteOldTasks();
             createAlarms();
+            // sendNotification(); ONLY FOR TEST
             return Result.success();
         }catch (Exception e){
             Log.e(UpdateWorker.class.getName(), e.getMessage(), e);
@@ -84,6 +98,14 @@ public class UpdateWorker extends Worker {
                 Log.i("INFO WORKER", "Created alarm for " + task.getTitle());
             });
         }
+    }
+
+    private void sendNotification(){
+        NotificationChannel channel = createChannel();
+        Notification notification = createNotification(channel);
+        NotificationManager notificationManager = getApplicationContext().getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+        notificationManager.notify(3, notification);
     }
 
     private boolean hasNotification(Task task){
@@ -146,5 +168,37 @@ public class UpdateWorker extends Worker {
     private long createNewId(List<Task> tasks){
         Task task = Collections.max(tasks, Comparator.comparing(Task::getId));
         return task.getId() + 1;
+    }
+
+    @Override
+    public void onStopped() {
+        super.onStopped();
+        Handler handler = new Handler(Looper.getMainLooper());
+        WorkManager workManager = WorkManager.getInstance(getApplicationContext());
+        Log.i("WORKER UPDATE", "Worker [ id = " + this.getId() + " ] was stopped.");
+        handler.post(() -> WorkObserver.removeObserver(workManager));
+        workManager.pruneWork();
+        workManager.cancelAllWork();
+        PeriodicWorkRequest workRequest = new PeriodicWorkRequest.Builder(UpdateWorker.class, 15, TimeUnit.MINUTES, 15, TimeUnit.MINUTES).build();
+        workManager.enqueueUniquePeriodicWork("update_worker", ExistingPeriodicWorkPolicy.KEEP, workRequest);
+        Observer<WorkInfo> newObserver = WorkObserver.createNewObserver(workManager);
+        handler.post(() -> workManager.getWorkInfoByIdLiveData(workRequest.getId()).observeForever(newObserver));
+        Log.i("WORKER UPDATE", "New Worker created [ id = " + workRequest.getId() + " ]");
+    }
+
+    private Notification createNotification(NotificationChannel channel){
+        return NotificationTaskCreator.newNotification(getApplicationContext())
+                .setTitle("Worker")
+                .setText("Updated")
+                .setChannel(channel)
+                .create();
+    }
+
+    private NotificationChannel createChannel(){
+        return NotificationChannelCreator.newChannel()
+                .setChannelId("worker_update_notification")
+                .setChannelName("channel_worker_notification")
+                .setChannelImportance(NotificationManager.IMPORTANCE_HIGH)
+                .create();
     }
 }
