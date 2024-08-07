@@ -1,7 +1,6 @@
 package com.example.taskmanager.repository.online_database;
 
 import android.content.Context;
-import android.os.Looper;
 import android.util.Log;
 
 import com.example.taskmanager.enumerator.RetryNumber;
@@ -14,13 +13,11 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class Synchronizer {
-//    private Context context;
     private TaskDao taskDao;
     private GitHub gitHub;
 
     public Synchronizer(Context context){
         try {
-//            this.context = context;
             gitHub = GitHub.getInstance(context);
             taskDao = AppDatabase.getDatabase(context).taskDao();
         } catch (Exception e) {
@@ -30,14 +27,9 @@ public class Synchronizer {
 
     public void synchronizeFromWeb() {
         try {
-//            if (isActiveConnection()) {
                 List<Task> tasks = gitHub.pullFromRemote(false, RetryNumber._3);
                 Log.i(Synchronizer.class.getName(), "Pulled Tasks : " + tasks.size());
                 saveToRoom(tasks);
-//            } else {
-//                manageLooper();
-//                Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
-//            }
         } catch (Exception e) {
             Log.e(Synchronizer.class.getName(), e.getMessage(), e);
         }
@@ -45,13 +37,8 @@ public class Synchronizer {
 
     public void synchronizeFromRoom() {
         try {
-//            if (isActiveConnection()) {
                 List<Task> tasks = taskDao.getAll();
                 gitHub.pushToRemote(tasks, false, RetryNumber._3);
-//            } else {
-//                manageLooper();
-//                Toast.makeText(context, "Cannot synchronize.", Toast.LENGTH_SHORT).show();
-//            }
         } catch (Exception e) {
             Log.e(Synchronizer.class.getName(), e.getMessage(), e);
         }
@@ -59,15 +46,9 @@ public class Synchronizer {
 
     public List<Task> directlyGetAll() {
         Future<List<Task>> future = Executors.newSingleThreadExecutor().submit(() -> {
-//            if (isActiveConnection()) {
                 List<Task> pulledTasks = gitHub.pullFromRemote(true, RetryNumber._3);
                 Log.i(Synchronizer.class.getName(), "Pulled Tasks : " + pulledTasks.size());
                 return pulledTasks;
-//            } else {
-//                manageLooper();
-//                Log.e(Synchronizer.class.getName(), "No connection.");
-//                return new ArrayList<>();
-//            }
         });
         try {
             return future.get();
@@ -102,24 +83,8 @@ public class Synchronizer {
         });
     }
 
-    private Boolean isActiveConnection() {
-        try {
-            String command = "ping -c 1 google.com";
-            return Runtime.getRuntime().exec(command).waitFor() == 0;
-        } catch (Exception e) {
-            Log.e(Synchronizer.class.getName(), e.getMessage(), e);
-            return false;
-        }
-    }
-
     private void saveToRoom(List<Task> tasks) {
         taskDao.deleteAll();
         taskDao.insertAll(tasks);
-    }
-
-    private void manageLooper(){
-        if(Looper.myLooper() == null){
-            Looper.prepare();
-        }
     }
 }

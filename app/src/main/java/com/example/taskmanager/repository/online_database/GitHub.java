@@ -1,7 +1,9 @@
 package com.example.taskmanager.repository.online_database;
 
 import android.content.Context;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.taskmanager.BuildConfig;
 import com.example.taskmanager.R;
@@ -33,6 +35,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 class GitHub {
+    private Context context;
     private static final String REPO_URL = BuildConfig.REPO_URL;
     private static GitHub instance;
     private final UsernamePasswordCredentialsProvider credentials;
@@ -43,6 +46,7 @@ class GitHub {
     private static final int MAX_RETRY = 5;
 
     private GitHub(Context context) {
+        this.context = context;
         String userGit = context.getString(R.string.user_git);
         String tokenGit = context.getString(R.string.tkn_git);
         credentials = new UsernamePasswordCredentialsProvider(userGit, tokenGit);
@@ -76,9 +80,11 @@ class GitHub {
             Log.e(Synchronizer.class.getName(), e.getMessage(), e);
             pullFromRemote(forWorker, RetryNumber._3);
             Log.i(Synchronizer.class.getName(), "Attempt number push: " + attemptNumber);
-            if(attemptNumber == MAX_RETRY)
+            if(attemptNumber == MAX_RETRY) {
+                Looper.prepare();
+                Toast.makeText(context, "Connection issue.", Toast.LENGTH_LONG).show();
                 throw new PushException();
-            else
+            } else
                 pushToRemote(tasks, forWorker, retryNumber.getRetryNumber(retryNumber.getNumber() - 1));
         }finally {
             if(writer != null) writer.close();
@@ -105,9 +111,11 @@ class GitHub {
             Log.i(Synchronizer.class.getName(), "Attempt number pull: " + attemptNumber);
             if(e instanceof TransportException)
                 cloneCommand = Git.cloneRepository().setURI(REPO_URL).setCredentialsProvider(credentials);
-            if(attemptNumber == MAX_RETRY)
+            if(attemptNumber == MAX_RETRY) {
+                Looper.prepare();
+                Toast.makeText(context, "Connection issue.", Toast.LENGTH_LONG).show();
                 throw new PullException();
-            else
+            } else
                 pullFromRemote(forWorker, retryNumber.getRetryNumber(retryNumber.getNumber() - 1));
         }
         return tasks;

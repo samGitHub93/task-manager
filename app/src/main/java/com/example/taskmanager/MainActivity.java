@@ -51,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(null);
         setContentView(R.layout.activity_main);
         progressBar = findViewById(R.id.progressBar);
-        fragmentManager = getSupportFragmentManager();
         updateFromWeb(true);
+        fragmentManager = getSupportFragmentManager();
         initFragments();
         initNavigationButton();
         initFloatingButton();
